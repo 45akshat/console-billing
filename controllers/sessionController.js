@@ -1,5 +1,6 @@
-const { updateCashInHand, deductWalletAmount } = require('../services/loginService');
+const { updateCashInHand, deductWalletAmount, addWalletAmount } = require('../services/loginService');
 const sessionService = require('../services/sessionService');
+const jwt = require('jsonwebtoken');
 
 // Helper function to convert date to IST
 const convertToIST = (date) => {
@@ -58,10 +59,29 @@ exports.createSession = async (req, res) => {
 exports.updateSession = async (req, res) => {
     try {
         const { sessionId } = req.params; // Extract sessionId from route parameters
-        const updates = req.body; // Extract update fields from request body
+        const { sessionData, oldSessionData } = req.body; // Extract new and old session data from request body
+        console.log(oldSessionData.UserID)
+
+        // If the session is for a member, handle wallet adjustments
+        if (oldSessionData.isMember) {
+            // Add the amount of the old session back to the wallet
+            await addWalletAmount(oldSessionData.UserID, oldSessionData.totalPrice);
+        }
+
+        if (sessionData.isMember) {
+            // Deduct the amount of the new session from the wallet
+            await deductWalletAmount(oldSessionData.UserID, sessionData.totalPrice);
+        }
+
+        
+        if (sessionData.isMember == false) {
+            await updateCashInHand(oldSessionData.Location_Id, -oldSessionData.payment.cash);
+            await updateCashInHand(oldSessionData.Location_Id, sessionData.payment.cash);
+        }
+
 
         // Update session details using the service
-        const updatedSession = await sessionService.updateSessionDetails(sessionId, updates);
+        const updatedSession = await sessionService.updateSessionDetails(sessionId, sessionData);
 
         // Send the response with the updated session
         res.status(200).json({
@@ -222,5 +242,28 @@ exports.renderAllSessionsPage = async (req, res) => {
     } catch (error) {
         console.error('Error fetching sessions:', error);
         res.status(500).send('Error loading sessions');
+    }
+};
+
+exports.handleQrScan = (req, res) => {
+    const token = req.body.token;
+    const secretKey = 'secret_key_123';
+    console.log(token);
+
+    try {
+        const decoded = jwt.verify(token, secretKey);
+        const userData = JSON.parse(decoded.data);
+
+        const tokenTimestamp = new Date(userData.timestamp).getTime();
+        const currentTimestamp = new Date().getTime();
+        const timeDifference = Math.abs(currentTimestamp - tokenTimestamp) / 1000 / 60; // Difference in minutes
+
+        if (timeDifference > 2) {
+            return res.status(400).json({ error: 'Invalid token: timestamp difference is more than 2 minutes' });
+        }
+
+        res.json({ data: userData });
+    } catch (err) {
+        res.status(400).json({ error: 'Invalid token' });
     }
 };

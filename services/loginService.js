@@ -74,6 +74,7 @@ async function getUser(locationId) {
 // Update user password
 async function updateUserPassword(locationId, newPassword) {
   try {
+    
     const user = await Login.findOne({ Location_Id: locationId });
     if (!user) {
       throw new Error('User not found');
@@ -88,35 +89,55 @@ async function updateUserPassword(locationId, newPassword) {
 }
 
 
+// Helper function to sanitize locationId
+const sanitizeLocationId = (locationId) => {
+  if (locationId !== 'admin' && locationId.includes('-admin')) {
+    return locationId.replace('-admin', '');
+  }
+  return locationId;
+};
+
 const getCashInHand = async (locationId) => {
   try {
+    locationId = sanitizeLocationId(locationId);
+
     const login = await Login.findOne({ Location_Id: locationId });
     if (!login) {
-      throw new Error(`Login with Location_Id ${locationId} not found`);
+      throw new Error(`Login with Location_Id "${locationId}" not found.`);
     }
+
     return login.cash_in_hand;
   } catch (error) {
-    throw new Error(`Error fetching cash_in_hand: ${error.message}`);
+    throw new Error(`Error fetching cash_in_hand for Location_Id "${locationId}": ${error.message}`);
   }
 };
 
 const updateCashInHand = async (locationId, amountToDeduct) => {
   try {
-    const login = await Login.findOne({ Location_Id: locationId });
-    if (!login) {
-      throw new Error(`Login with Location_Id ${locationId} not found`);
+    if (isNaN(amountToDeduct)) {
+      throw new Error('Invalid amountToDeduct: must be a valid number.');
     }
 
-    // Deduct the amount (negative amounts can be added back)
-    const newCashInHand = login.cash_in_hand + parseInt(amountToDeduct);
+    locationId = sanitizeLocationId(locationId);
 
+    const login = await Login.findOne({ Location_Id: locationId });
+    if (!login) {
+      throw new Error(`Login with Location_Id "${locationId}" not found.`);
+    }
 
+    // Update cash_in_hand
+    const newCashInHand = login.cash_in_hand + Number(amountToDeduct);
     login.cash_in_hand = newCashInHand;
-    return await login.save();
+
+    // Save changes
+    await login.save();
+
+    return login;
   } catch (error) {
-    throw new Error(`Error updating cash_in_hand: ${error.message}`);
+    throw new Error(`Error updating cash_in_hand for Location_Id "${locationId}": ${error.message}`);
   }
 };
+
 
 const deductWalletAmount = async (userId, amountToDeduct) => {
   try {
@@ -140,6 +161,25 @@ const deductWalletAmount = async (userId, amountToDeduct) => {
   }
 };
 
+const addWalletAmount = async (userId, amountToAdd) => {
+  try {
+    const user = await User.findOne({ UserID: userId });
+    if (!user) {
+      throw new Error(`User with ID ${userId} not found`);
+    }
+
+    // Add the amount to the wallet balance
+    const newWalletBalance = user.Wallet_Info + parseInt(amountToAdd);
+
+    user.Wallet_Info = newWalletBalance;
+
+    console.log("Added amount to wallet");
+    return await user.save();
+  } catch (error) {
+    throw new Error(`Error adding wallet amount: ${error.message}`);
+  }
+};
+
 module.exports = {
   createUser,
   verifyUser,
@@ -149,5 +189,6 @@ module.exports = {
   updateUserPassword,
   updateCashInHand,
   getCashInHand,
-  deductWalletAmount, // Add the new function to exports
+  deductWalletAmount,
+  addWalletAmount, // Add the new function to exports
 };

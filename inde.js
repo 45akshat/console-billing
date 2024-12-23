@@ -1,35 +1,12 @@
-const { MongoClient } = require('mongodb');
+const jwt = require('jsonwebtoken');
 
-async function migrateCollection() {
-  const client = new MongoClient("mongodb+srv://slayde:slayde9638@cluster0.xycoh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&ssl=true");
-  try {
-    await client.connect();
-    const db = client.db("test");
-    const collection = db.collection("shop_locations");
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1widXNlcklkXCI6XCJiZTU0OWY5OC0xN2RmLTQ5YWEtYWNhOS02ZTM5NzE1N2YzOGFcIixcInRpbWVzdGFtcFwiOlwiMjAyNC0xMi0yNCAwNDowMjoyN1wiLFwiYWN0aW9uXCI6XCJDaGVjay1PdXRcIn0iLCJpYXQiOjE3MzQ5OTMxNDd9.fqbS5JHALrJzZoYnRfMZjwX_8tSWLM3Ol0xUwpHmUGI';
+const secretKey = 'secret_key_123';
 
-    const cursor = collection.find({});
-    while (await cursor.hasNext()) {
-      const doc = await cursor.next();
-      if (doc.x && doc.y) {
-        await collection.updateOne(
-          { _id: doc._id },
-          {
-            $set: {
-              location: {
-                type: "Point",
-                coordinates: [parseFloat(doc.y), parseFloat(doc.x)]
-              }
-            }
-          }
-        );
-      }
-    }
-    console.log("Migration completed successfully.");
-  } catch (e) {
-    console.error("Error during migration:", e);
-  } finally {
-    await client.close();
-  }
+try {
+  const decoded = jwt.verify(token, secretKey);
+  console.log('Decoded JWT:', decoded);
+} catch (err) {
+  console.error('Invalid token:', err.message);
 }
 
-migrateCollection();

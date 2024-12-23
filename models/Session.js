@@ -10,6 +10,10 @@ const sessionSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    UserID: {
+        type: String,
+        required: true,
+    },
     tableNumber: {
         type: Number,
         required: true,

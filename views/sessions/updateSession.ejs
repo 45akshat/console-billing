@@ -453,6 +453,8 @@ games.forEach(game => {
 
                 // Prepare session data to send to the backend
                 const sessionData = {
+                    UserID: '<%= session.UserID %>',
+                    Location_Id: '<%= session.Location_Id %>',
                     platform,
                     tableNumber: parseInt(document.getElementById("tableNumber").value),
                     primaryContact: {
@@ -471,6 +473,28 @@ games.forEach(game => {
                     totalPrice,
                 };
 
+                // Get the old session data
+                const oldSessionData = {
+                    UserID: '<%= session.UserID %>',
+                    Location_Id: '<%= session.Location_Id %>',
+                    platform: '<%= session.platform %>',
+                    tableNumber: <%= session.tableNumber %>,
+                    primaryContact: {
+                        name: '<%= session.primaryContact.name %>',
+                        contact: '<%= session.primaryContact.contact %>',
+                    },
+                    isMember: <%= session.isMember %>,
+                    game: '<%= session.game %>',
+                    customers: <%- JSON.stringify(session.customers) %>,
+                    payment: {
+                        cash: <%= session.payment.cash %>,
+                        online: <%= session.payment.online %>,
+                        wallet: <%= session.payment.wallet %>,
+                    },
+                    discount: <%= session.discount %>,
+                    totalPrice: <%= session.totalPrice %>,
+                };
+
                 try {
                                 // Get the session ID from the data attribute
             const sessionId = document.getElementById('sessionData').dataset.sessionId;
@@ -481,7 +505,7 @@ games.forEach(game => {
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify(sessionData),
+                        body: JSON.stringify({ sessionData, oldSessionData }),
                     });
 
                     const result = await response.json();
@@ -551,11 +575,11 @@ games.forEach(game => {
                     console.log("Customers:", customers);
                     console.log("Total Price:", totalPrice);
 
-                    if (isMember && wallet < totalPrice) {
-                        disableEnableButton("true")
-                    } else {
-                        disableEnableButton("false")
-                    }
+                    // if (isMember && wallet < totalPrice) {
+                    //     disableEnableButton("true")
+                    // } else {
+                    //     disableEnableButton("false")
+                    // }
                     // Set total price in the form
                     document.getElementById("totalPrice").value = totalPrice;
                 } else if (platform === 'PS') {
@@ -601,11 +625,11 @@ games.forEach(game => {
                         totalPrice += ps_pricing['members'][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.5
                         document.getElementsByName('totalPrice')[0].value = totalPrice
 
-                        if (isMember && wallet < totalPrice) {
-                            disableEnableButton("true")
-                        } else {
-                            disableEnableButton("false")
-                        }
+                        // if (isMember && wallet < totalPrice) {
+                        //     disableEnableButton("true")
+                        // } else {
+                        //     disableEnableButton("false")
+                        // }
                     }
 
 
