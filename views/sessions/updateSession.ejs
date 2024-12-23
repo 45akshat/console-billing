@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Session</title>
+    <link rel="stylesheet" href="/sessions/create.css"> <!-- Add your CSS file if needed -->
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Update Session</h1>
+        
+    <!-- A hidden input or data attribute to store the session ID -->
+    <div id="sessionData" data-session-id="<%= session._id %>"></div>
+
+        <!-- First Form (Design to Keep) -->
+        <form id="sessionForm" method="POST">
+            <div class="platform-buttons">
+                <button type="button" class="platform-button" onclick="selectPlatform('PC')"
+                    <%= session.platform === 'PC' ? 'class="selected"' : '' %>>PC</button>
+                <button type="button" class="platform-button" onclick="selectPlatform('PS')"
+                    <%= session.platform === 'PS' ? 'class="selected"' : '' %>>PS</button>
+                <!-- Hidden input for selected platform -->
+                <input type="hidden" id="platformInput" name="platform" value="<%= session.platform %>" required>
+            </div>
+
+            <!-- Table Number -->
+            <label for="tableNumber">Table Number</label>
+            <input type="number" id="tableNumber" name="tableNumber" value="<%= session.tableNumber %>" required>
+
+            <!-- Primary Contact -->
+            <h3>Primary Contact</h3>
+            <label for="primaryName">Name</label>
+            <input type="text" id="primaryName" name="primaryContact[name]" value="<%= session.primaryContact.name %>" required>
+
+            <label for="primaryPhone">Phone Number</label>
+            <input type="tel" id="primaryPhone" name="primaryContact[phoneNumber]" value="<%= session.primaryContact.contact %>" required>
+
+            <div class="wallet-container">
+                <label for="primaryWallet">Wallet</label>
+                <input type="number" id="primaryWallet" disabled name="primaryContact[wallet]" value="<%= session.payment.wallet %>" readonly>
+            </div>
+
+            <!-- Game Selection -->
+            <label for="gameDropdown">Game</label>
+            <div id="gameDropdownContainer">
+                <select id="gameDropdown" name="game" class="game-dropdown" required>
+                    <option value="<%= session.game %>" selected> <%= session.game %> </option>
+                </select>
+            </div>
+
+
+            <!-- Customers Section -->
+            <h3>Customers</h3>
+            <div id="customersContainer">
+                <% session.customers.forEach((customer, index) => { %>
+                    <div class="customer">
+                        <label for="customerName<%= index %>">Customer Name</label>
+                        <input type="text" name="customers[<%= index %>][name]" value="<%= customer.name %>" required>
+                        <br>
+            
+                        <label for="sessionDuration<%= index %>">Session Duration (in hours)</label>
+                        <select name="customers[<%= index %>][sessionDuration]" required>
+                            <% [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 24].forEach(duration => { %>
+                                <option value="<%= duration %>" <%= customer.sessionDuration == duration ? 'selected' : '' %>>
+                                    <%= duration == 24 ? '1 Day' : duration %>
+                                </option>
+                            <% }) %>
+                        </select>
+            
+                        <!-- Remove button -->
+                        <button type="button" class="removeCustomerBtn" onclick="removeCustomer(this)" style='background-color: rgba(255, 0, 0, 0.262); color: #a50606;'>Remove</button>
+                    </div>
+                <% }) %>
+            </div>
+
+            <!-- Button to Add More Customers -->
+            <button type="button" onclick="addCustomer()">Add Another Customer</button>
+
+            <!-- Payment Section -->
+            <h3>Payment</h3>
+            <div class="row_div">
+                <div class="col_div cash-container">
+                    <label for="cash">Cash</label>
+                    <input type="number" id="cash" name="payment[cash]" min="0" value="<%= session.payment.cash %>">
+                </div>
+
+                <div class="col_div online-container">
+                    <label for="online">Online</label>
+                    <input type="number" id="online" name="payment[online]" min="0" value="<%= session.payment.online %>">
+                </div>
+            </div>
+
+            <!-- Discount and Total Price -->
+            <label for="discount">Discount</label>
+            <input type="number" id="discount" name="discount" min="0" value="<%= session.discount %>">
+
+            <!-- Coupon Code -->
+            <label for="couponCode">Coupon Code</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="couponCode" name="couponCode" value="<%= session.couponCode %>" placeholder="Enter coupon code">
+                <button type="button" onclick="checkCoupon()">Check Coupon</button>
+            </div>
+
+            <label for="totalPrice">Total Price</label>
+            <input type="number" id="totalPrice" name="totalPrice" value="<%= session.totalPrice %>" disabled required>
+
+            <!-- Submit Button -->
+            <button id="submitButton" type="submit">Update Session</button>
+        </form>
+    </div>
+
+    
+    <script>
+        // Variable to store membership status
+        let isMember = false;
+
+
+        // Rewards Logic
+        const rewards = {
+            "5_hours_pay_4": (sessionDuration, totalPrice) => {
+                if (sessionDuration >= 4) {
+                    // Apply logic for 4 hours pay 5 hours
+                    totalPrice = totalPrice * 4 / 5; // Book 2 hours, pay for 3 hours
+                    
+                    return totalPrice;
+                }
+                return totalPrice;
+            },
+            "15_percent_off_coupon_pc_ps": (sessionDuration, totalPrice) => {
+                console.log(totalPrice, sessionDuration)
+                return totalPrice * 0.85; // Apply 15% discount
+            },
+            "15_minutes_free_per_hour": (sessionDuration, totalPrice) => { //--- SELF-----
+                if (sessionDuration >= 1) {
+                    const freeMinutes = Math.floor(sessionDuration) * 15; // 15 mins free per hour
+                }
+                return totalPrice;
+            },
+            "30_minutes_free_per_hour": (sessionDuration, totalPrice) => { //--- SELF-----
+                if (sessionDuration >= 1) {
+                    const freeMinutes = Math.floor(sessionDuration) * 30; // 30 mins free per hour
+                    totalPrice -= (freeMinutes / 60) * totalPrice; // Subtract the price equivalent of free time
+                }
+                return totalPrice;
+            },
+            "1_hour_free": (sessionDuration, totalPrice) => { 
+                if (sessionDuration >= 1) {
+                    totalPrice -= totalPrice / sessionDuration; // Subtract the price equivalent of one hour
+                }
+                return totalPrice;
+            },
+            "book_2_hours_get_3": (sessionDuration, totalPrice) => {  
+                if (sessionDuration === 2) {
+                    totalPrice = totalPrice * 2 / 3; // Book 2 hours, pay for 3 hours
+                }
+                return totalPrice;
+            },
+            "pay_for_4_players_book_5": (sessionDuration, totalPrice, platform) => {
+                if (platform === 'PC') {
+                    totalPrice = totalPrice * 4 / 5; // Book for 5 players but pay for 4 (only applicable for PC)
+                }
+                return totalPrice;
+            },
+            "day_pass_100_off": (sessionDuration, totalPrice, platform) => {
+                if (platform === 'PC' && sessionDuration==12) {
+                    totalPrice -= 100; // Apply Rs 100 off for PC Day pass
+                }
+                return totalPrice;
+            },
+            "50_percent_off_ps": (sessionDuration, totalPrice, platform) => {
+                if (platform === 'PS') {
+                    totalPrice *= 0.5; // Apply 50% off for PS gaming
+                }
+                return totalPrice;
+            },
+            "25_percent_off_coupon_ps": (sessionDuration, totalPrice, platform) => {
+                if (platform === 'PS') {
+                    totalPrice *= 0.75; // Apply 25% off for PS gaming
+                }
+                return totalPrice;
+            }
+        };
+
+        // Function to apply reward based on coupon code
+        function applyReward(couponCode, sessionDuration, platform, totalPrice) {
+            
+            const rewardFunction = rewards[couponCode];
+
+            console.log(rewardFunction, totalPrice)
+            let discountedTotal = 0;
+                discountedTotal = rewardFunction(sessionDuration, totalPrice, platform);
+                console.log(discountedTotal)
+                return discountedTotal
+        }
+
+        async function checkCoupon() {
+                // Get the coupon code and apply the reward if any
+                const formData = new FormData(sessionForm);
+
+                const couponCode = document.getElementById('couponCode').value.trim();
+                const platform = document.getElementById("platformInput").value;
+                const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
+                const wallet = document.getElementById(`primaryWallet`).value;
+                let totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
+
+
+                let longestSessionDuration = 0; // Initialize the variable for longest session duration
+
+                for (let i = 0; i < customerCount; i++) {
+                    const name = formData.get(`customers[${i}][name]`);
+                    const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
+
+                    // Update longest session duration
+                    if (sessionDuration > longestSessionDuration) {
+                        longestSessionDuration = sessionDuration;
+                    }
+
+                }
+
+
+            console.log(couponCode)
+            try {
+                // Make a GET request to fetch coupon data from the backend API using the entered coupon code
+                const response = await fetch(`/codes/codes/${encodeURIComponent(couponCode)}`);
+
+                // Check if the response is okay (status code 200-299)
+                const data = await response.json(); // Parse JSON response
+
+                // Debugging purpose: log the response data to the console
+                console.log(data);
+
+                // Check if the coupon is valid
+                if (response.ok && data && data.Code === couponCode) {
+                    // Extract reward type from the "Reward" field (assuming it's a string, e.g., "15% off Coupon (PC & PS)")
+                    const reward = data.Reward;
+
+                    // Apply the reward logic based on the coupon
+                    let discountedCPrice = applyReward(reward, longestSessionDuration, platform, totalPrice);
+
+                    alert(`Coupon applied! Total price after applying reward: ₹${discountedCPrice}`);
+                } else {
+                    alert(data.message || 'Invalid coupon code or coupon expired.'); // Show error message if coupon is invalid or expired
+                }
+            } catch (error) {
+                console.error('Error verifying coupon:', error);
+                alert('An error occurred while checking the coupon. Please try again.'); // Show generic error message
+            }
+
+            // Return the updated total price
+            return totalPrice;
+        }
+
+        // Function to fetch user data based on the code (UserID)
+        const fetchUserData = async (userID) => {
+            try {
+                const response = await fetch(`/users/users/${userID}`);
+
+                // Check if the response is successful
+                if (response.ok) {
+                    const userData = await response.json();
+                    console.log("User Data:", userData);
+
+                    // Pre-fill the form with user data
+                    document.getElementById('primaryName').value = userData.user.Name;
+                    document.getElementById('primaryPhone').value = userData.user.contact;
+                    document.getElementById('primaryWallet').value = userData.user.Wallet_Info;
+                } else {
+                    console.error("Error fetching user data:", response.statusText);
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+
+        // Check if there is a 'code' parameter in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code'); // Get the 'code' parameter
+
+        // If 'code' exists in the URL, log it to the console and fetch user data
+        if (<%= session.isMember %>) {
+            console.log("Code parameter:", code);
+            fetchUserData(code);
+
+
+            document.getElementsByClassName('cash-container')[0].style.display = 'none';
+            document.getElementsByClassName('online-container')[0].style.display = 'none';
+            // Set membership status to true
+            isMember = true;
+        } else {
+            // Set membership status to false if code is not present
+            isMember = false;
+            document.getElementsByClassName('wallet-container')[0].style.display = 'none';
+
+        }
+
+
+
+        const pcGames = ["Valorant", "Counter-Strike", "pubg", "left4dead2", "Dota 2", "Fortnite", "Ace Empires", "GTA-V"];
+        const psGames = [
+            "Asphalt 9: Legends", "Astro’s Playroom", "Call of Duty Black Ops 6", "Call of Duty: Black Ops 3",
+            "Call of Duty: Modern Warfare", "Cricket 22", "Cricket 24", "Dirt 5", "F1 23", "F1 2023",
+            "FC 24", "FC 25", "FIFA 23", "FIFA 25", "Fall Guys", "Fortnite", "GRIP", "Gran Turismo 7",
+            "Grand Theft Auto V", "God of War Ragnarok", "Grip Combat Racing", "Hogwarts Legacy", "It Takes Two",
+            "Jump Force", "Mortal Kombat 1", "NBA 2K23", "NBA 2K24", "Rocket League", "Sid Meier's Civilization VI",
+            "Spider-Man 2", "Speedstorm", "Starlit Kart Racing", "Stumble Guys", "Tetris", "Tekken 7", "Tekken 8",
+            "The Last of Us Part I", "UFC 4", "Uncharted", "WWE 2K23", "Wukong"
+        ];
+
+        let pc_pricing = {};
+        let ps_pricing = {};
+
+        async function fetchPricing(locationId) {
+            try {
+                const pcResponse = await fetch(`/pricing/${locationId}/pcPricing.json`);
+                pc_pricing = await pcResponse.json();
+
+                const psResponse = await fetch(`/pricing/${locationId}/psPricing.json`);
+                ps_pricing = await psResponse.json();
+            } catch (error) {
+                console.error('Error fetching pricing:', error);
+            }
+        }
+
+        function selectPlatform(platform) {
+            document.getElementById("platformInput").value = platform;
+
+            document.querySelectorAll(".platform-button").forEach(button => {
+                button.classList.remove("active");
+            });
+            document.querySelector(`.platform-button[onclick="selectPlatform('${platform}')"]`).classList.add("active");
+
+            const gameDropdown = document.getElementById("gameDropdown");
+            gameDropdown.innerHTML = '<option value="">Select a game</option>';
+
+            const games = platform === "PC" ? pcGames : psGames;
+
+// Retrieve the selected game from the session
+const selectedGame = "<%= session.game %>";
+
+games.forEach(game => {
+    const option = document.createElement("option");
+    option.value = game;
+    option.textContent = game;
+
+    // Set the selected attribute if the game matches the session's selected game
+    if (game === selectedGame) {
+        option.selected = true;
+    }
+
+    gameDropdown.appendChild(option);
+});
+
+            
+
+            
+        }
+
+        let customerCount = <%= session.customers.length %>;
+
+    
+
+        function addCustomer() {
+            const customersContainer = document.getElementById('customersContainer');
+            const customerDiv = document.createElement('div');
+            customerDiv.classList.add('customer');
+
+            customerDiv.innerHTML = `
+                <label for="customerName">Customer Name</label>
+                <input type="text" name="customers[${customerCount}][name]" required>
+                <br>
+
+                <label for="sessionDuration">Session Duration (in hours)</label>
+                <select name="customers[${customerCount}][sessionDuration]" required>
+                    <option value="0.5">0.5</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="12">1 Day</option>
+                </select>
+
+                <!-- Remove button -->
+                <button type="button" class="removeCustomerBtn" style='background-color: rgba(255, 0, 0, 0.262); color: #a50606;' onclick="removeCustomer(this)">Remove</button>
+            `;
+            customersContainer.appendChild(customerDiv);
+            customerCount++;
+        }
+
+        function removeCustomer(button) {
+            const customersContainer = document.getElementById('customersContainer');
+            const customerDiv = button.parentElement;
+
+            if (customersContainer.children.length > 1) {
+                customerDiv.remove();
+            } else {
+                alert("At least one customer must remain.");
+            }
+        }
+
+
+        function disableEnableButton(bool) {
+            if (bool == "true") {
+                document.getElementById('submitButton').setAttribute('disabled', true);
+            } else {
+                document.getElementById('submitButton').removeAttribute('disabled');
+
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const locationId = '<%= locationId %>'; // Get locationId from the server-side rendering
+
+
+            await fetchPricing(locationId);
+            selectPlatform(document.getElementById("platformInput").value)
+            const sessionForm = document.getElementById('sessionForm');
+
+            sessionForm.addEventListener('submit', async function (e) {
+                e.preventDefault(); // Prevent the default form submission behavior
+                console.log('Form submitted!');
+
+                const formData = new FormData(sessionForm);
+                const platform = document.getElementById("platformInput").value;
+                const wallet = parseFloat(document.getElementById("primaryWallet").value) || 0;
+                const primaryName = formData.get("primaryContact[name]");
+                const primaryContact = formData.get("primaryContact[phoneNumber]");
+                const game = document.getElementById("gameDropdown").value;
+                const totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
+
+                // Collect customer data
+                let customers = [];
+                let longestSessionDuration = 0; // Initialize the variable for longest session duration
+
+                for (let i = 0; i < customerCount; i++) {
+                    const name = formData.get(`customers[${i}][name]`);
+                    const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
+                    customers.push({ name, sessionDuration });
+
+                    // Update longest session duration
+                    if (sessionDuration > longestSessionDuration) {
+                        longestSessionDuration = sessionDuration;
+                    }
+
+                }
+
+
+
+                // Prepare session data to send to the backend
+                const sessionData = {
+                    platform,
+                    tableNumber: parseInt(document.getElementById("tableNumber").value),
+                    primaryContact: {
+                        name: primaryName,
+                        contact: primaryContact,
+                    },
+                    isMember,
+                    game,
+                    customers,
+                    payment: {
+                        cash: parseFloat(document.getElementById("cash").value) || 0,
+                        online: parseFloat(document.getElementById("online").value) || 0,
+                        wallet: wallet,
+                    },
+                    discount: parseFloat(document.getElementById("discount").value) || 0,
+                    totalPrice,
+                };
+
+                try {
+                                // Get the session ID from the data attribute
+            const sessionId = document.getElementById('sessionData').dataset.sessionId;
+
+                    // Submit session data to the backend
+                    const response = await fetch(`/sessions/update/${sessionId}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(sessionData),
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert("Session created successfully!");
+                        console.log(result);
+                    } else {
+                        alert(`Error: ${result.message}`);
+                        console.error(result.error);
+                    }
+                } catch (error) {
+                    console.error("Error submitting session form:", error);
+                    alert("An unexpected error occurred.");
+                }
+            });
+
+
+            // Event listener for any changes in the customer name or session duration
+            sessionForm.addEventListener('input', (e) => {
+                const target = e.target;
+
+                // Check if the change occurred in a customer name or session duration field
+                if (target.name && (target.name.includes('customers') && (target.name.includes('name') || target.name.includes('sessionDuration')))) {
+                    calculateTotalPrice();
+                }
+            });
+
+            async function calculateTotalPrice() {
+                const formData = new FormData(sessionForm);
+                let customers = [];
+                let totalPrice = 0;
+                const platform = document.getElementById("platformInput").value;
+                const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
+                const wallet = document.getElementById(`primaryWallet`).value;
+
+
+                if (platform === 'PC') {
+                    for (let i = 0; i < customerCount; i++) {
+                        const name = formData.get(`customers[${i}][name]`);
+                        const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
+                        let customerPrice;
+                        let pricePerHour = 0;
+
+                        if (sessionDuration === 0.5) {
+                            pricePerHour = pricing["1_HOUR"] / 2; // Half-hour rate
+                        } else if (sessionDuration <= 2) {
+                            pricePerHour = pricing["1_HOUR"];
+                        } else if (sessionDuration == 12) {
+                            pricePerHour = pricing["12_HOUR"];
+                        }
+                        else {
+                            pricePerHour = pricing["3_HOURS_AND_MORE"];
+                        }
+
+                        if (sessionDuration <= 2) {
+                            customerPrice = pricePerHour;
+                        } else {
+
+                            customerPrice = pricePerHour * sessionDuration;
+                        }
+                        totalPrice += customerPrice;
+
+                        customers.push({ name, sessionDuration, customerPrice });
+                    }
+
+                    console.log("Platform:", platform);
+                    console.log("Customers:", customers);
+                    console.log("Total Price:", totalPrice);
+
+                    if (isMember && wallet < totalPrice) {
+                        disableEnableButton("true")
+                    } else {
+                        disableEnableButton("false")
+                    }
+                    // Set total price in the form
+                    document.getElementById("totalPrice").value = totalPrice;
+                } else if (platform === 'PS') {
+
+
+
+                    for (let i = 0; i < customerCount; i++) {
+                        customers.push({
+                            name: formData.get(`customers[${i}][name]`),
+                            sessionDuration: parseFloat(formData.get(`customers[${i}][sessionDuration]`))
+                        });
+                    }
+
+                    console.log("Form Data:", formData);
+                    console.log("Customers:", customers);
+
+
+                    let timeframe = 0.5; // 0.5-hour blocks
+                    let activeCustomers = {}; // To track active customers during each time block
+
+                    // Loop through each customer and calculate their active session time
+                    customers.forEach(customer => {
+                        let sessionTime = customer.sessionDuration;
+
+                        // Split customer session into 0.5 hour blocks and record active customers for each block
+                        for (let i = 0; i < sessionTime; i += timeframe) {
+                            let currentBlock = i + timeframe;  // Represents the end of each block (e.g., 0.5, 1.0, etc.)
+
+                            // Store the active customer in the appropriate block
+                            if (!activeCustomers[currentBlock]) {
+                                activeCustomers[currentBlock] = [];
+                            }
+
+                            activeCustomers[currentBlock].push(customer.name);
+                        }
+                    });
+
+                    console.log(activeCustomers);
+
+
+                    // Loop to log active customers for each time block
+                    for (let block in activeCustomers) {
+                        totalPrice += ps_pricing['members'][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.5
+                        document.getElementsByName('totalPrice')[0].value = totalPrice
+
+                        if (isMember && wallet < totalPrice) {
+                            disableEnableButton("true")
+                        } else {
+                            disableEnableButton("false")
+                        }
+                    }
+
+
+                } else {
+                    alert("Please select a valid platform.");
+                }
+            }
+
+
+        })
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <link rel="stylesheet" href="/sessions/all.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(120deg, #00296b, #05c8ef);
+    }
+    .container {
+      width: 400px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .message {
+      text-align: center;
+      color: red;
+    }
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200px;
+      height: 100%;
+      background: #333;
+      color: #fff;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .side-menu nav ul {
+      list-style: none;
+      padding: 0;
+    }
+    .side-menu nav ul li {
+      margin-bottom: 10px;
+    }
+    .side-menu nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+    .side-menu nav ul li a i {
+      margin-right: 10px;
+    }
+    .side-menu nav ul li a.active {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- Side Menu -->
+  <aside class="side-menu">
+    <nav>
+      <ul>
+        <li><a href="/" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+        <!-- <li><a href="/login/create"><i class="fas fa-user-plus"></i> Create Account</a></li> -->
+        <li><a href="/sessions/create"><i class="fas fa-plus-circle"></i> Create Session</a></li>
+        <li><a href="/sessions/all"><i class="fas fa-list"></i> All Sessions</a></li>
+        <li><a href="/cashlogs/create"><i class="fas fa-money-bill-wave"></i> Create Cash Log</a></li>
+        <li><a href="/cashlogs/all"><i class="fas fa-file-alt"></i> All Cash Logs</a></li>
+        <li><a href="/login/change-password"><i class="fas fa-key"></i> Change Password</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="container">
+    <h2>Login</h2>
+
+    <!-- Form for logging in -->
+    <form id="loginForm" method="POST">
+      <label for="loginLocationId">Location ID</label>
+      <input type="text" id="loginLocationId" name="Location_Id" required>
+
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" name="Password" required>
+
+      <button type="submit">Log In</button>
+    </form>
+  </div>
+
+  <script>
+    // Handle login form submission
+    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      
+      const locationId = document.getElementById('loginLocationId').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const response = await fetch('/login/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ Location_Id: locationId, Password: password })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Save JWT to localStorage
+        localStorage.setItem('jwt', result.token);
+
+        // Optionally redirect the user
+        window.location.href = '/sessions/all'; // Change this URL to where you want the user to be redirected
+      } else {
+        // Display error message
+        alert(result.message || 'Login failed. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

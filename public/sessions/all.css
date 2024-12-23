@@ -1,0 +1,449 @@
+/* Importing the Poppins font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* General Styling */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9fafb; /* Light gray background */
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Side Menu */
+aside.side-menu {
+    width: 180px;
+    background-color: #fff;
+    color: #333;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s ease;
+}
+
+/* Navigation */
+aside.side-menu nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+aside.side-menu nav ul li {
+    margin-bottom: 20px;
+}
+
+aside.side-menu nav ul li a {
+    text-decoration: none;
+    color: #333;
+    font-size: 12px;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    transition: background-color 0.3s, padding-left 0.3s, transform 0.3s;
+    font-weight: 500;
+}
+
+aside.side-menu nav ul li a:hover {
+    background-color: #f1f1f1;
+    padding-left: 30px;
+    transform: translateX(5px);
+}
+
+aside.side-menu nav ul li a.active {
+    background-color: #e7e7e7;
+    color: #000000;
+    padding-left: 30px;
+}
+
+aside.side-menu nav ul li a i {
+    font-size: 14px;
+    color: #333;
+}
+
+aside.side-menu nav ul li a:hover i {
+    color: #1b025f;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    aside.side-menu {
+        width: 220px;
+    }
+
+    aside.side-menu nav ul li a {
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+
+    aside.side-menu nav ul li a i {
+        font-size: 14px;
+    }
+}
+
+/* Main Content */
+main {
+    margin-left: 290px;
+    padding: 40px;
+    max-width: calc(100% - 260px);
+}
+
+/* Header */
+h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Filter Section */
+.filter-section {
+    margin-bottom: 30px;
+}
+
+.filter-section .filter-form {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-section label {
+    font-size: 14px;
+    font-weight: 400;
+    color: #555;
+}
+
+.filter-section input[type="date"] {
+    padding: 10px 15px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+}
+
+.filter-section input[type="date"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.filter-section button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.filter-section button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Metrics Section */
+.metrics-section {
+    padding: 20px;
+    background-color: #f7f9fc;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.metrics-card {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 220px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+#totalRevenueCard {
+    width: 300px;
+}
+
+.metrics-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.metric-item {
+    font-size: 12px;
+    font-weight: 400;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.metric-item strong {
+    font-weight: 400;
+    color: #333;
+}
+
+.metric-item span {
+    font-size: 28px;
+    font-weight: 500;
+    color: #000000;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .metrics-container {
+        justify-content: center;
+    }
+
+    .metrics-card {
+        width: 200px;
+        padding: 15px;
+    }
+
+    .metric-item {
+        font-size: 13px;
+    }
+
+    .metric-item span {
+        font-size: 14px;
+    }
+}
+
+/* Graphs Section */
+.graphs-section {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.graph-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 100%;
+}
+
+.graph-card {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 100%;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.graph-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.graph-card h2 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+/* Sessions Data Section */
+.sessions-data-section {
+    margin-top: 40px;
+}
+
+.sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.session-card {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.session-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.session-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.session-card p {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.session-card p strong {
+    font-weight: 600;
+}
+
+.session-card ul {
+    padding-left: 20px;
+    list-style-type: disc;
+    font-size: 12px;
+}
+
+.session-card li {
+    color: #666;
+}
+
+.no-sessions {
+    text-align: center;
+    font-size: 14px;
+    color: #999;
+    font-weight: 600;
+}
+
+/* Box Shadow & Hover Effects */
+.card-hover {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.card-hover:hover {
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    aside.side-menu {
+        width: 180px;
+    }
+
+    main {
+        margin-left: 200px;
+    }
+
+    .graphs-section {
+        flex-direction: column;
+    }
+
+    .graph-container {
+        gap: 20px;
+    }
+
+    .metrics {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .metrics .metric-card {
+        padding: 15px;
+    }
+
+    .metrics p {
+        font-size: 13px;
+    }
+
+    .session-card {
+        padding: 20px;
+    }
+
+    .session-card p {
+        font-size: 11px;
+    }
+
+    .session-card h3 {
+        font-size: 14px;
+    }
+}
+
+
+.sessions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 12px; /* Small font size */
+    border-radius: 12px; /* More pronounced rounded corners */
+    overflow: hidden; /* Prevents content from overflowing */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for a modern look */
+}
+
+.sessions-table th, .sessions-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border: 1px solid #ddd; /* Light border for separation */
+}
+
+.sessions-table th {
+    background-color: #f7f7f7; /* Light background for headers */
+    color: #333; /* Dark text for contrast */
+    font-weight: 600; /* Bold headers */
+}
+
+.sessions-table td {
+    background-color: #fff; /* White background for data cells */
+    color: #555; /* Slightly lighter text for data */
+}
+
+.sessions-table td ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.sessions-table tr:hover {
+    background-color: #f1f1f1; /* Highlight row on hover */
+}
+
+/* Adjust for a cleaner presentation */
+.sessions-table td.time-column {
+    font-weight: 500; /* Less bold for time */
+    color: #666; /* Lighter gray for time text */
+}
+
+.sessions-table td.date-column {
+    display: none; /* Hides the repeated date */
+}
+
+.sessions-table td[colspan="12"] {
+    text-align: center;
+    font-style: italic;
+    color: #777; /* Gray color for 'no sessions' message */
+}
+
+/* Optional: Responsive table design for smaller screens */
+@media (max-width: 768px) {
+    .sessions-table {
+        font-size: 12px; /* Smaller font on mobile */
+    }
+
+    .sessions-table th, .sessions-table td {
+        padding: 8px 10px; /* Reduced padding for smaller screens */
+    }
+}
+
+
+.export-btn {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    padding: 10px 20px; /* Button padding */
+    font-size: 12px; /* Font size */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth background change */
+    margin-bottom: 15px; /* Space below button */
+}
+
+.export-btn:hover {
+    background-color: #45a049; /* Darker green on hover */
+}

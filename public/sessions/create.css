@@ -1,0 +1,237 @@
+/* Import Poppins font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+/* General Body Styling */
+body {
+    font-family: 'Poppins', sans-serif; /* Apply Poppins font */
+    font-size: 14px;
+    line-height: 1.6;
+    background-color: #f7f7f7;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+
+/* Form Heading */
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Form Container */
+form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Form Labels */
+label {
+    margin: 10px 0 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Input Fields */
+input[type="text"], input[type="number"], input[type="tel"], input[type="datetime-local"], button {
+    padding: 12px 15px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    transition: border 0.3s, box-shadow 0.3s;
+    box-sizing: border-box;
+}
+
+/* Focus Effect on Inputs */
+input[type="text"]:focus, input[type="number"]:focus, input[type="tel"]:focus, input[type="datetime-local"]:focus {
+    border-color: #0073e6;
+    box-shadow: 0 2px 8px rgba(0, 115, 230, 0.3);
+}
+
+/* Button Styling */
+button {
+    background-color: #0073e6;
+    font-family: 'Poppins', sans-serif; /* Apply Poppins font */
+
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 12px 20px;
+    border-radius: 8px;
+    width: 100%;
+}
+
+/* Button Hover Effect */
+button:hover {
+    background-color: #005bb5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Section Titles */
+h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 30px;
+    color: #0661bc;
+}
+
+/* Customer Section Styling */
+#customersContainer {
+    margin-bottom: 20px;
+}
+
+.customer {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.customer label {
+    font-size: 12px;
+}
+
+/* Add Another Customer Button */
+button[type="button"] {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+    width: auto;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+
+/* Add Another Customer Hover Effect */
+button[type="button"]:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Input Styling for Date and Time Picker */
+input[type="time"] {
+    padding: 12px 15px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border 0.3s, box-shadow 0.3s;
+}
+
+/* Focus Effect on Date/Time Input */
+input[type="time"]:focus {
+    border-color: #0073e6;
+    box-shadow: 0 2px 8px rgba(0, 115, 230, 0.3);
+}
+
+/* Make sure the input cannot be manually typed in */
+input[type="time"]::-webkit-outer-spin-button,
+input[type="time"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="time"] {
+    -moz-appearance: textfield;
+}
+
+
+/* Hover and Focus Effects */
+input[type="time"]:hover,
+input[type="time"]:focus {
+    border-color: #4caf50;  /* Green Border on Hover/Focus */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+
+/* Platform Selection Buttons */
+.platform-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.platform-button {
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.platform-button.active {
+    background-color: #3f1fd0;
+    color: #fff;
+    border-color: #005bb5;
+}
+
+.platform-button:hover {
+    background-color: #e0e0e0;
+    color: #0073e6;
+}
+
+/* Game Dropdown Styling */
+#gameDropdownContainer {
+    /* margin-top: 20px; */
+}
+
+.game-dropdown {
+    padding: 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 300px;
+    transition: border 0.3s, box-shadow 0.3s;
+}
+
+.game-dropdown:focus {
+    border-color: #0073e6;
+    box-shadow: 0 2px 8px rgba(0, 115, 230, 0.3);
+}
+
+.row_div{
+    display: flex; align-items: center; gap: 10px;
+}
+
+.row_div input{
+    margin: 0;
+}
+
+.col_div{
+    display: flex;
+    flex-direction: column;
+}
+
+
+#submitButton:disabled {
+    background-color: grey; /* Background color when disabled */
+    cursor: not-allowed; /* Change cursor to not-allowed */
+}

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cash Logs</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+  <style>
+    body {
+      background-color: #f4f7fa;
+      font-family: 'Roboto', sans-serif;
+    }
+    header {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: #fff;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    .card-header {
+      background: #007bff;
+      color: #fff;
+      padding: 20px;
+      font-size: 1.5rem;
+      font-weight: 500;
+      text-align: center;
+    }
+    .card-body {
+      padding: 20px;
+    }
+    form {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+    form label {
+      font-weight: 500;
+    }
+    form input {
+      flex: 1;
+      min-width: 200px;
+      border-radius: 8px;
+      border: 1px solid #ced4da;
+      padding: 8px;
+    }
+    form button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    form button:hover {
+      background-color: #0056b3;
+    }
+    #exportButton {
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #exportButton:hover {
+      background-color: #218838;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    table th, table td {
+      padding: 12px;
+      text-align: left;
+    }
+    table th {
+      position: sticky;
+      top: 0;
+      background-color: #007bff;
+      color: #fff;
+      text-transform: uppercase;
+    }
+    table tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    table tr:hover {
+      background-color: #e9ecef;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #f1f1f1;
+      font-size: 0.9rem;
+    }
+    footer a {
+      color: #007bff;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cash Logs</h1>
+  </header>
+
+  <div class="container my-5">
+    <div class="card">
+      <div class="card-header">
+        Transaction History for Location: <strong><%= locationId %></strong>
+      </div>
+      <div class="card-body">
+        <p><strong>Cash in Hand:</strong> ₹<%= cashInHand %></p>
+        <!-- Date Range Form -->
+        <form action="/cashlogs/all" method="get">
+          <label for="startDate">Start Date:</label>
+          <input type="date" id="startDate" name="startDate" value="<%= startDate %>">
+          <label for="endDate">End Date:</label>
+          <input type="date" id="endDate" name="endDate" value="<%= endDate %>">
+          <button type="submit"><i class="fas fa-filter"></i> Filter</button>
+        </form>
+
+        <button id="exportButton"><i class="fas fa-file-excel"></i> Export to Excel</button>
+
+        <% if (transactions && transactions.length > 0) { %>
+          <table id="transactionsTable" class="table table-bordered table-hover mt-4">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Transaction Type</th>
+                <th>Location</th>
+                <th>Amount</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% transactions.forEach(transaction => { %>
+                <tr>
+                  <td><%= new Date(transaction.date).toLocaleDateString() %></td>
+                  <td><%= transaction.transaction_type %></td>
+                  <td><%= transaction.Location_Id %></td>
+                  <td>₹<%= transaction.amount %></td>
+                  <td><%= transaction.description %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <p class="text-muted text-center mt-4">No transactions available for this location in the selected date range.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 <a href="#">Cash Tracking</a>. All rights reserved.</p>
+    <p><a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms of Service</a></p>
+  </footer>
+
+  <script>
+    document.getElementById('exportButton').addEventListener('click', function() {
+      const table = document.getElementById('transactionsTable');
+      if (!table) {
+        alert('No data available to export');
+        return;
+      }
+
+      try {
+        var wb = XLSX.utils.book_new();
+        var ws = XLSX.utils.table_to_sheet(table);
+        XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
+        XLSX.writeFile(wb, `cash_logs_${new Date().toISOString().split('T')[0]}.xlsx`);
+      } catch (error) {
+        console.error('Export failed:', error);
+        alert('Failed to export data. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

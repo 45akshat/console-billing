@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console Gaming</title>
+    <link rel="stylesheet" href="/sessions/all.css">
+    <!-- Include Chart.js for graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
+    </head>
+    <style>
+        /* Style for the loading spinner */
+        .loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.2s ease-out; /* Add transition for fade out */
+        }
+        .loading-spinner video {
+            width: 50%; /* Adjust the size as needed */
+        }
+        .loading-spinner.hidden {
+            opacity: 0;
+            pointer-events: none; /* Prevent interaction when hidden */
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const loadingSpinner = document.querySelector('.loading-spinner');
+            const lastShown = localStorage.getItem('lastShown');
+            const now = new Date().getTime();
+            const oneDay = 24 * 60 * 60 * 1000;
+
+            if (!lastShown || now - lastShown > oneDay) {
+                // Show the loading spinner
+                loadingSpinner.style.display = 'flex';
+
+                // Hide the loading spinner after 3.8 seconds with fade out
+                setTimeout(function () {
+                    loadingSpinner.classList.add('hidden');
+                    setTimeout(function () {
+                        loadingSpinner.style.display = 'none';
+                    }, 200); // Match the duration of the CSS transition
+                }, 3800);
+
+                // Update the last shown time in localStorage
+                localStorage.setItem('lastShown', now);
+            } else {
+                // Hide the loading spinner immediately
+                loadingSpinner.style.display = 'none';
+            }
+
+            const dateInput = document.getElementById('sessionDate');
+            dateInput.value = "<%= selectedDate %>";
+
+            // Get sessions data for the selected date
+            const sessions = JSON.parse(`<%- JSON.stringify(sessions) %>`); // Safely inject sessions as a JSON string and parse it
+            console.log(sessions)
+            // Calculate total revenue
+            const totalRevenue = sessions.reduce((acc, session) => acc + session.totalPrice, 0);
+
+            // Calculate total sessions
+            const totalSessions = sessions.length;
+
+            // Calculate top session price
+            const topSessionPrice = Math.max(...sessions.map(session => session.totalPrice));
+
+// Calculate most played game
+const gameCount = {};
+sessions.forEach(session => {
+    if (session.game) { // Only increment if game is defined
+        gameCount[session.game] = (gameCount[session.game] || 0) + 1;
+    }
+});
+const mostPlayedGame = Object.keys(gameCount).reduce((a, b) => gameCount[a] > gameCount[b] ? a : b, "");
+
+            // Display the stats
+            document.getElementById('totalRevenue').textContent = "₹ "+ totalRevenue.toFixed(2);
+            document.getElementById('totalSessions').textContent = totalSessions;
+            document.getElementById('topSessionPrice').textContent = topSessionPrice.toFixed(2);
+            document.getElementById('mostPlayedGame').textContent = mostPlayedGame;
+
+            // Create chart for session distribution
+            const sessionData = {
+                labels: Object.keys(gameCount),
+                data: Object.values(gameCount)
+            };
+
+            const ctx = document.getElementById('sessionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sessionData.labels,
+                    datasets: [{
+                        label: 'Sessions per Game',
+                        data: sessionData.data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+// Create graph for session times (low time and peak hours)
+const sessionTimes = sessions.map(session => new Date(session.createdAt).getUTCHours());
+const hourCount = new Array(24).fill(0);
+sessionTimes.forEach(hour => hourCount[hour] += 1);
+
+const timeCtx = document.getElementById('timeChart').getContext('2d');
+new Chart(timeCtx, {
+    type: 'line',
+    data: {
+        labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+        datasets: [{
+            label: 'Sessions per Hour',
+            data: hourCount,
+            borderColor: 'rgba(255, 159, 64, 1)',
+            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+            fill: true,
+            tension: 0.4, // Adjust the tension value for a curvier line
+            pointBackgroundColor: 'rgba(255, 159, 64, 1)', // Color of points
+            pointBorderColor: '#fff', // Border color of points
+            pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)', // Hover background color
+            pointHoverBorderColor: '#fff', // Hover border color
+            pointHoverRadius: 5, // Size of point on hover
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        hover: {
+            mode: 'nearest', // Allows hover to target the closest element
+            intersect: false, // If true, hover only works when the cursor is directly over an item
+        },
+        plugins: {
+            tooltip: {
+                enabled: true, // Enable tooltips
+                backgroundColor: 'rgba(0,0,0,0.7)', // Tooltip background color
+                titleColor: '#fff', // Title text color
+                bodyColor: '#fff', // Body text color
+                borderColor: '#ccc', // Tooltip border color
+                borderWidth: 1, // Border width for tooltips
+                callbacks: {
+                    // Customize tooltip content
+                    label: function(tooltipItem) {
+                        return `Sessions: ${tooltipItem.raw}`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+
+            // Add JWT token to the form
+            // const jwtToken = localStorage.getItem('jwt');
+            // if (jwtToken) {
+            //     const tokenInput = document.createElement('input');
+            //     tokenInput.type = 'hidden';
+            //     tokenInput.name = 'jwt';
+            //     tokenInput.value = jwtToken;
+            //     document.querySelector('.filter-form').appendChild(tokenInput);
+            // }
+
+        // Calculate table totals
+        const totals = sessions.reduce((acc, session) => {
+            return {
+                cash: acc.cash + (parseFloat(session.payment.cash) || 0),
+                online: acc.online + (parseFloat(session.payment.online) || 0),
+                wallet: acc.wallet + (parseFloat(session.payment.wallet) || 0),
+                discount: acc.discount + (parseFloat(session.discount) || 0),
+                total: acc.total + (parseFloat(session.totalPrice) || 0)
+            };
+        }, { cash: 0, online: 0, wallet: 0, discount: 0, total: 0 });
+
+        // Update totals in the table
+        document.getElementById('totalCash').textContent = totals.cash.toFixed(2);
+        document.getElementById('totalOnline').textContent = totals.online.toFixed(2);
+        document.getElementById('totalWallet').textContent = totals.wallet.toFixed(2);
+        document.getElementById('totalDiscount').textContent = totals.discount.toFixed(2);
+        document.getElementById('grandTotal').textContent = totals.total.toFixed(2);
+
+        // Add some styling to the totals row
+        const totalsRow = document.querySelector('.totals-row');
+        if (totalsRow) {
+            totalsRow.style.backgroundColor = '#f5f5f5';
+            totalsRow.style.fontWeight = 'bold';
+        }
+
+        });
+    </script>
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div class="loading-spinner">
+        <video src="/assets/animation.mp4" autoplay muted loop></video>
+    </div>
+
+    <!-- Side Menu -->
+    <aside class="side-menu">
+        <nav>
+            <ul>
+                <li><a href="/" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <!-- <li><a href="/login/create"><i class="fas fa-user-plus"></i> Create Account</a></li> -->
+                <li><a href="/sessions/create"><i class="fas fa-plus-circle"></i> Create Session</a></li>
+                <li><a href="/sessions/all"><i class="fas fa-list"></i> All Sessions</a></li>
+                <li><a href="/cashlogs/create"><i class="fas fa-money-bill-wave"></i> Create Cash Log</a></li>
+                <li><a href="/cashlogs/all"><i class="fas fa-file-alt"></i> All Cash Logs</a></li>
+            </ul>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main>
+        <h1 class="page-title">Console Gaming</h1>
+
+        <!-- Date Filter Section -->
+        <section class="filter-section">
+            <form method="GET" action="/sessions/all" class="filter-form">
+                <label for="sessionDate">Select Date: </label>
+                <input type="date" id="sessionDate" name="date" value="<%= selectedDate %>" required>
+
+                
+                <button type="submit">Filter</button>
+            </form>
+        </section>
+
+        <!-- Metrics Section (Clean Card Layout) -->
+        <section class="metrics-section">
+                <div class="metrics-card total-revenue">
+                    <div class="metric-item">
+                        <strong>Total Revenue</strong><br> <span id="totalRevenue">0.00</span>
+                    </div>
+                </div>
+                <div class="metrics-card">
+                    <div class="metric-item">
+                        <strong>Total Sessions</strong><br> <span id="totalSessions">0</span>
+                    </div>
+                </div>
+                <div class="metrics-card">
+                    <div class="metric-item">
+                        <strong>Top Session Price</strong><br> <span id="topSessionPrice">0.00</span>
+                    </div>
+                </div>
+                <div class="metrics-card">
+                    <div class="metric-item">
+                        <strong>Most Played Game</strong><br> <span id="mostPlayedGame">-</span>
+                    </div>
+                </div>
+        </section>
+        
+
+        <!-- Graphs Section (Clean Grid Layout) -->
+        <section class="graphs-section">
+            <div class="graph-card">
+                <h2>Session Distribution by Game</h2>
+                <canvas id="sessionChart"></canvas>
+            </div>
+            <div class="graph-card">
+                <h2>Sessions by Hour</h2>
+                <canvas id="timeChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Sessions Data Section (List View) -->
+<!-- Sessions Data Section (Table View) -->
+<section class="sessions-data-section">
+    <h2>Sessions Details</h2>
+    <button onclick="exportToExcel()" class="export-btn">Export to Excel</button>
+    <table class="sessions-table">
+        <thead>
+            <tr>
+                <th>Platform</th>
+                <th>Location</th>
+                <th>Table Number</th>
+                <th>Primary Contact Name</th>
+                <th>Primary Contact Phone</th>
+                <th>Is Member</th>
+                <th>Game</th>
+                <th>Customers</th>
+                <th>Payment (Cash)</th>
+                <th>Payment (Online)</th>
+                <th>Payment (Wallet)</th>
+                <th>Discount</th>
+                <th>Total Price</th>
+                <th>Coupon</th> <!-- New Coupon Column -->
+                <th>Created At</th>
+                <th>Invoice</th>
+        <% if (user.Location_Id === 'admin' || user.Location_Id.includes('-admin')) { %>
+            <th>Edit</th> <!-- New Edit Column -->
+        <% } %>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (sessions && sessions.length > 0) { %>
+                <% sessions.forEach(session => { %>
+                    <tr>
+                        <td><%= session.platform %></td>
+                        <td><%= session.Location_Id %></td>
+                        <td><%= session.tableNumber %></td>
+                        <td><%= session.primaryContact.name %></td>
+                        <td><%= session.primaryContact.contact %></td>
+                        <td><%= session.isMember ? 'Yes' : 'No' %></td>
+                        <td><%= session.game %></td>
+                        <td>
+                            <ul>
+                                <% session.customers.forEach(customer => { %>
+                                    <li>
+                                        <%= customer.name %> - <%= customer.sessionDuration %> hrs
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        </td>
+                        <td><%= session.payment.cash %></td>
+                        <td><%= session.payment.online %></td>
+                        <td><%= session.payment.wallet %></td>
+                        <td><%= session.discount %></td>
+                        <td><%= session.totalPrice %></td>
+                        <td><%= session.coupon ? session.coupon : 'N/A' %></td> <!-- Coupon Data -->
+                        <td><%= new Date(session.createdAt).toLocaleString('en-GB', { timeZone: 'UTC' }) %></td>
+
+    
+                        <td>
+                            <button 
+                                onclick="generateInvoice('<%- JSON.stringify(session).replace(/'/g, '&#39;').replace(/"/g, '&quot;') %>')" 
+                                style="background: none; border: none; cursor: pointer;" 
+                                title="Generate Invoice">
+                                <!-- SVG Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <line x1="10" y1="9" x2="8" y2="9"></line>
+                                </svg>
+                            </button>
+                        </td>
+    
+                        <!-- Edit Column -->
+                        <% if (user.Location_Id === 'admin' || user.Location_Id.includes('admin')) { %>
+                         
+                        <td>
+                            <a href="/sessions/update/<%= session._id %>" style="text-decoration: none; color: inherit;">
+                                <button style="background: none; border: none; cursor: pointer;" title="Edit Session">
+                                    <!-- Edit SVG Icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2">
+                                        <path d="M17 3l4 4-10 10H7v-4L17 3z"></path>
+                                        <path d="M14 7l7 7"></path>
+                                    </svg>
+                                </button>
+                            </a>
+                        </td>
+        <% } %>
+
+                    </tr>
+                <% }) %>
+                <!-- Add totals row -->
+                <tr class="totals-row">
+                    <td colspan="8" style="text-align: right; font-weight: bold;">Totals:</td>
+                    <td id="totalCash">0</td>
+                    <td id="totalOnline">0</td>
+                    <td id="totalWallet">0</td>
+                    <td id="totalDiscount">0</td>
+                    <td id="grandTotal">0</td>
+                    <td colspan="3"></td>
+                </tr>
+            <% } else { %>
+                <tr>
+                    <td colspan="14">No sessions found for the selected date</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    
+    
+</section>
+
+    </main>
+</body>
+<script>
+function generateInvoice(sessionString) {
+    // Decode the HTML-escaped characters
+    const decodedString = sessionString
+        .replace(/&#39;/g, "'")
+        .replace(/&quot;/g, '"');
+
+    // Parse the JSON
+    const session = JSON.parse(decodedString);
+
+    // Initialize jsPDF
+    const doc = new jsPDF();
+
+
+    // Add company name and details
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("CONSOLE GAMING", 10, 15);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("123 Business Avenue, City Name", 10, 20);
+    doc.text("Email: info@consolegmaing.in", 10, 25);
+    doc.text("GST No: XXAB1234CXX", 10, 30);
+
+    // Add a horizontal line
+    doc.setLineWidth(0.5);
+    doc.line(10, 35, 200, 35);
+
+    // Add invoice header
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("INVOICE", 105, 45, null, null, "center");
+
+    // Add invoice and customer details
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Invoice Details:", 10, 55);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Invoice Number: INV-${session.tableNumber}-${Date.now()}`, 10, 60);
+    doc.text(`Date: ${new Date(session.createdAt).toLocaleDateString()}`, 10, 65);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Customer Details:", 10, 75);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Name: ${session.primaryContact.name}`, 10, 80);
+    doc.text(`Contact: ${session.primaryContact.contact}`, 10, 85);
+    doc.text(`Member Status: ${session.isMember ? "Yes" : "No"}`, 10, 90);
+
+    // Add session details in a table
+    doc.setFont("helvetica", "bold");
+    doc.text("Session Details:", 10, 100);
+
+    // Draw table
+    const startX = 10;
+    const startY = 105;
+    const cellWidth = 190;
+    const cellHeight = 10;
+
+    doc.setFont("helvetica", "bold");
+    doc.setDrawColor(0);
+    doc.setFillColor(240, 240, 240);
+    doc.rect(startX, startY, cellWidth, cellHeight, "F");
+    doc.text("Platform", startX + 5, startY + 7);
+    doc.text("Table Number", startX + 50, startY + 7);
+    doc.text("Game", startX + 110, startY + 7);
+
+    doc.setFont("helvetica", "normal");
+    // Set a light gray stroke color for the subtle border
+doc.setDrawColor(200, 200, 200); // Light gray
+doc.setLineWidth(0.3); // Thin border
+
+// Draw the rectangle with only a border (no fill)
+doc.rect(startX, startY + cellHeight, cellWidth, cellHeight); // Default is stroke only (style "S")
+    doc.text(`${session.platform}`, startX + 5, startY + cellHeight + 7);
+    doc.text(`${session.tableNumber}`, startX + 50, startY + cellHeight + 7);
+    doc.text(`${session.game}`, startX + 110, startY + cellHeight + 7);
+
+    // Add payment details
+    doc.setFont("helvetica", "bold");
+    doc.text("Payment Details:", 10, 135);
+    doc.setFont("helvetica", "normal");
+
+    doc.text(`Total Price: Rs. ${session.totalPrice}`, 10, 140);
+
+    // Add coupon details if available
+    if (session.coupon) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Coupon Applied:", 10, 150);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Coupon Code: ${session.coupon}`, 10, 155);
+    }
+
+    // Add a footer with a thank-you note
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(100);
+    doc.text("Thank you for your business!", 105, 280, null, null, "center");
+    doc.setTextColor(0);
+    // Save the PDF
+    doc.save(`Invoice_${session.tableNumber}.pdf`);
+}
+
+
+    function exportToExcel() {
+        // Get the sessions data from the table
+        const table = document.querySelector('.sessions-table');
+        const worksheet = XLSX.utils.table_to_sheet(table);
+        const workbook = XLSX.utils.book_new();
+    
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sessions');
+    
+        // Create the Excel file and download it
+        XLSX.writeFile(workbook, 'sessions.xlsx');
+    }
+    </script>
+    
+</html>

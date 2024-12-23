@@ -1,0 +1,44 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const userRoutes = require('./routes/userRoutes'); // User routes
+const sessionRoutes = require('./routes/sessionRoutes'); // Session routes
+const codeRoutes = require('./routes/codeRoutes'); 
+const loginRoutes = require('./routes/loginRoutes'); 
+const cashLogsRoutes = require('./routes/cashLogsRoutes'); 
+const { connectDb } = require('./config/db'); // Database connection
+const path = require('path');
+
+const app = express();
+const PORT = 3000;
+
+// Middleware to parse incoming requests
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// Serve static files (like CSS, JS, images)
+app.use(express.static('public'));
+
+// Serve static files from the "pricing" directory
+app.use('/pricing', express.static(path.join(__dirname, 'pricing')));
+
+// Set EJS as the view engine
+app.set('view engine', 'ejs');
+
+
+// Use cookie-parser to parse cookies
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+// Use routes
+app.use('/users', userRoutes); // User-related routes (registration, login)
+app.use('/sessions', sessionRoutes); // Session-related routes (creating and listing sessions)
+app.use('/codes', codeRoutes); // Session-related routes (creating and listing sessions)
+app.use('/login', loginRoutes); // Session-related routes (creating and listing sessions)
+app.use('/cashlogs', cashLogsRoutes); // Session-related routes (creating and listing sessions)
+
+// Start the server
+app.listen(PORT, async () => {
+    // Connect to the MongoDB database
+    await connectDb();
+    console.log(`Server is running on http://localhost:${PORT}`);
+});

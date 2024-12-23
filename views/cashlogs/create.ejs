@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Cash Log</title>
+  <link rel="stylesheet" href="/cashlogs/create.css">
+</head>
+<body>
+
+  <header>
+    <h1>Create New Cash Log</h1>
+  </header>
+
+  <section>
+    <h2>Add Transaction for Location: <%= locationId %></h2>
+
+    <form action="/cashlogs/cashlogs" method="POST">
+      <div>
+        <label for="transactionType">Transaction Type</label>
+        <select id="transactionType" name="transactionType" required>
+          <option value="deposit">Deposit</option>
+          <option value="withdrawal">Withdrawal</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="amount">Amount</label>
+        <input type="number" id="amount" name="amount" required step="0.01" min="0">
+      </div>
+
+      <div>
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="4" required></textarea>
+      </div>
+
+      <!-- <div>
+        <label for="balanceAfterTransaction">Balance After Transaction</label>
+        <input type="number" id="balanceAfterTransaction" name="balanceAfterTransaction" required step="0.01" min="0">
+      </div> -->
+
+      <button type="submit">Create Cash Log</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>&copy; 2024 Cash Tracking</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+/* styles.css */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+}
+
+h1 {
+    color: #333;
+    margin-top: 20px;
+}
+
+#reader {
+    margin: 20px auto;
+    width: 300px;
+    height: 300px;
+}
+
+#result {
+    margin-top: 20px;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #ccc;
+    display: inline-block;
+    width: 300px;
+}
+
+#output {
+    color: #007bff;
+    font-weight: bold;
+}

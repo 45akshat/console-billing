@@ -1,0 +1,146 @@
+/* Reset some default styling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f4f5f7;
+  color: #333;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+header {
+  background-color: #ffffff;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+header h1 {
+  font-size: 28px;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+}
+
+section {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+section h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  margin-bottom: 30px;
+  align-items: center;
+}
+
+form label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+form input[type="date"] {
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  width: fit-content;
+}
+
+form input[type="date"]:focus {
+  border-color: #007aff;
+}
+
+form button {
+  background-color: #007aff;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  width: fit-content;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form button:hover {
+  background-color: #005bb5;
+}
+
+table {
+  width: 100%;
+  margin-top: 30px;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  padding: 12px;
+  text-align: left;
+  font-size: 16px;
+  color: #333;
+}
+
+table th {
+  background-color: #f1f1f1;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+table tr:hover {
+  background-color: #f1f1f1;
+}
+
+table td {
+  border-top: 1px solid #eee;
+}
+
+p {
+  color: #666;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 30px;
+}
+
+footer {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 14px;
+  color: #888;
+}
+
+/* Small screen (mobile) adjustments */
+@media screen and (max-width: 600px) {
+  section {
+    padding: 20px;
+  }
+
+  form input[type="date"], form button {
+    width: 100%;
+  }
+
+  table th, table td {
+    font-size: 14px;
+    padding: 10px;
+  }
+}

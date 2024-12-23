@@ -1,0 +1,35 @@
+<%- include('../layout') %>
+<h2>Session Details</h2>
+
+<table>
+    <tr>
+        <th>Table Number</th>
+        <td><%= session.tableNumber %></td>
+    </tr>
+    <tr>
+        <th>Customer Name</th>
+        <td><%= session.customerName %></td>
+    </tr>
+    <tr>
+        <th>Contact Number</th>
+        <td><%= session.contactNumber %></td>
+    </tr>
+    <tr>
+        <th>Session Time</th>
+        <td><%= session.sessionTime %> minutes</td>
+    </tr>
+    <tr>
+        <th>Payment Method</th>
+        <td><%= session.paymentMethod %></td>
+    </tr>
+    <tr>
+        <th>Total Amount</th>
+        <td><%= session.totalAmount %></td>
+    </tr>
+    <tr>
+        <th>Discount</th>
+        <td><%= session.discount || 'None' %></td>
+    </tr>
+</table>
+
+<a href="/sessions/list">Back to Session List</a>
