@@ -48,13 +48,13 @@ app.get('/', (req, res) => {
                     background-color: black;
                 }
                 video {
-                    max-width: 100%;
+                    max-width: 30vw;
                     max-height: 100%;
                 }
             </style>
         </head>
         <body>
-            <video src="/assets/animation.mp4" controls autoplay></video>
+            <video src="/assets/animation.mp4" autoplay muted loop></video>
         </body>
         </html>
     `);
