@@ -29,6 +29,37 @@ app.set('view engine', 'ejs');
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+// Route to show an MP4 video centered on a black background at the root URL
+app.get('/', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Admin Video</title>
+            <style>
+                body {
+                    margin: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background-color: black;
+                }
+                video {
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+            </style>
+        </head>
+        <body>
+            <video src="/assets/animation.mp4" controls autoplay></video>
+        </body>
+        </html>
+    `);
+});
+
 // Use routes
 app.use('/users', userRoutes); // User-related routes (registration, login)
 app.use('/sessions', sessionRoutes); // Session-related routes (creating and listing sessions)
