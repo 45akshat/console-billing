@@ -259,7 +259,7 @@ exports.handleQrScan = (req, res) => {
         const timeDifference = Math.abs(currentTimestamp - tokenTimestamp) / 1000 / 60; // Difference in minutes
 
         if (timeDifference > 2) {
-            return res.status(400).json({ error: 'Invalid token: timestamp difference is more than 2 minutes' });
+            return res.status(400).json({ error: 'Invalid token: timestamp difference is more than 2 minutes '+ currentTimestamp +", "+ tokenTimestamp });
         }
 
         res.json({ data: userData });
