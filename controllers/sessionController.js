@@ -254,8 +254,8 @@ exports.handleQrScan = (req, res) => {
         const decoded = jwt.verify(token, secretKey);
         const userData = JSON.parse(decoded.data);
 
-        const tokenTimestamp = new Date(userData.timestamp).getTime();
-        const currentTimestamp = new Date().getTime();
+        const tokenTimestamp = convertToIST(new Date(userData.timestamp)).getTime();
+        const currentTimestamp = convertToIST(new Date()).getTime();
         const timeDifference = Math.abs(currentTimestamp - tokenTimestamp) / 1000 / 60; // Difference in minutes
 
         if (timeDifference > 2) {
