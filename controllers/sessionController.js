@@ -245,7 +245,6 @@ exports.renderAllSessionsPage = async (req, res) => {
     }
 };
 
-const jwt = require('jsonwebtoken');
 
 exports.handleQrScan = (req, res) => {
     const token = req.body.token;
