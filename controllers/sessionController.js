@@ -244,8 +244,6 @@ exports.renderAllSessionsPage = async (req, res) => {
         res.status(500).send('Error loading sessions');
     }
 };
-
-
 exports.handleQrScan = (req, res) => {
     const token = req.body.token;
     const secretKey = 'secret_key_123';
@@ -255,28 +253,6 @@ exports.handleQrScan = (req, res) => {
         // Verify the JWT token
         const decoded = jwt.verify(token, secretKey);
         const userData = JSON.parse(decoded.data);
-
-        // Convert the token's local timestamp to a Date object
-        const tokenTimestamp = new Date(userData.timestamp);
-        const localTimezoneOffset = tokenTimestamp.getTimezoneOffset() * 60000; // Offset in milliseconds
-        const utcTokenTimestamp = tokenTimestamp.getTime() + localTimezoneOffset; // Adjust token timestamp to UTC
-
-        // Get the current timestamp in UTC
-        const currentTimestamp = Date.now();  // Current UTC time in milliseconds
-
-        // Log both timestamps in UTC format for debugging
-        console.log("Token Timestamp (Local):", tokenTimestamp.toISOString());
-        console.log("Token Timestamp (Adjusted UTC):", new Date(utcTokenTimestamp).toISOString());
-        console.log("Current Timestamp (UTC):", new Date(currentTimestamp).toISOString());
-
-        // Calculate the time difference in minutes
-        const timeDifference = Math.abs(currentTimestamp - utcTokenTimestamp) / 1000 / 60;
-        console.log(`Time Difference: ${timeDifference} minutes`);
-
-        // Check if the time difference exceeds 2 minutes
-        if (timeDifference > 2) {
-            return res.status(400).json({ error: 'Invalid token: timestamp difference is more than 2 minutes' });
-        }
 
         // If valid, return the user data
         res.json({ data: userData });
