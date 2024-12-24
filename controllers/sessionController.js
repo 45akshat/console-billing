@@ -248,6 +248,8 @@ function convertToIST(date) {
     return new Date(date.getTime() + offsetIST);
 }
 
+
+
 exports.handleQrScan = (req, res) => {
     const token = req.body.token;
     const secretKey = 'secret_key_123';
@@ -257,16 +259,16 @@ exports.handleQrScan = (req, res) => {
         const decoded = jwt.verify(token, secretKey);
         const userData = JSON.parse(decoded.data);
 
-        // Parse the timestamp and convert both to IST
-        const tokenTimestampIST = convertToIST(new Date(userData.timestamp)).getTime();
-        const currentTimestampIST = convertToIST(new Date()).getTime();
+        // Parse the token's timestamp directly
+        const tokenTimestamp = parseInt(userData.timestamp, 10); // Ensure it's an integer
+        const currentTimestamp = Date.now(); // Current timestamp in UTC
 
         // Calculate the time difference in minutes
-        const timeDifference = Math.abs(currentTimestampIST - tokenTimestampIST) / 1000 / 60;
+        const timeDifference = Math.abs(currentTimestamp - tokenTimestamp) / 1000 / 60;
 
         if (timeDifference > 2) {
             return res.status(400).json({ 
-                error: `Invalid token: timestamp difference is more than 2 minutes. Current: ${currentTimestampIST}, Token: ${tokenTimestampIST}` 
+                error: `Invalid token: timestamp difference is more than 2 minutes. Current: ${currentTimestamp}, Token: ${tokenTimestamp}` 
             });
         }
 
