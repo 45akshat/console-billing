@@ -278,7 +278,6 @@
                     document.getElementById('primaryPhone').value = userData.user.contact;
                     document.getElementById('primaryWallet').value = userData.user.Wallet_Info;
                     document.getElementById('primaryUserID').value = userData.user.UserID;
-                    document.getElementById('primaryUserID').value = userData.user.UserID;
                 } else {
                     console.error("Error fetching user data:", response.statusText);
                 }
@@ -475,7 +474,10 @@ function updateCustomerIndexes() {
                 const istOffset = 330; // IST offset in minutes (UTC+5:30)
                 const istTime = new Date(now.getTime() + (istOffset * 60 * 1000));
 
-                const primaryUserID = document.getElementById("primaryUserID").value;
+                let primaryUserID = document.getElementById("primaryUserID").value;
+                if (!primaryUserID) {
+                    primaryUserID = "none"
+                }
 
                 // Prepare session data to send to the backend
                 const sessionData = {
@@ -499,6 +501,8 @@ function updateCustomerIndexes() {
                     couponCode: document.getElementById("couponCode").value.trim(), // Add coupon code if applicable
                     createdAt: istTime.toISOString() // Add createdAt field with IST time
                 };
+
+                console.log(sessionData)
 
                 try {
                     // Submit session data to the backend

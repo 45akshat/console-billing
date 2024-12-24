@@ -36,6 +36,11 @@ exports.createSession = async (req, res) => {
             await deductWalletAmount(sessionData.UserID, sessionData.totalPrice);
         }
 
+        // Log "Oops" if primaryUserID is null
+        if (!sessionData.primaryUserID) {
+            console.log("Oops");
+        }
+
         // Create session using the service
         const session = await sessionService.createSession(sessionData);
 
