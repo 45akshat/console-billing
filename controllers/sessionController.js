@@ -2,7 +2,11 @@ const { updateCashInHand, deductWalletAmount, addWalletAmount } = require('../se
 const sessionService = require('../services/sessionService');
 const jwt = require('jsonwebtoken');
 
-
+// Helper function to convert date to IST
+const convertToIST = (date) => {
+    const istOffset = 330; // IST offset in minutes (UTC+5:30)
+    return new Date(date.getTime() + (istOffset * 60 * 1000));
+};
 
 // Create a new session
 exports.createSession = async (req, res) => {
@@ -241,39 +245,43 @@ exports.renderAllSessionsPage = async (req, res) => {
     }
 };
 
-
-function convertToIST(date) {
-    // Convert a given date to IST (UTC+5:30)
-    const offsetIST = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-    return new Date(date.getTime() + offsetIST);
-}
-
-
+const jwt = require('jsonwebtoken');
 
 exports.handleQrScan = (req, res) => {
     const token = req.body.token;
     const secretKey = 'secret_key_123';
-    console.log(token);
+    console.log("Received token:", token);
 
     try {
+        // Verify the JWT token
         const decoded = jwt.verify(token, secretKey);
         const userData = JSON.parse(decoded.data);
 
-        // Parse the token's timestamp directly
-        const tokenTimestamp = parseInt(userData.timestamp, 10); // Ensure it's an integer
-        const currentTimestamp = Date.now(); // Current timestamp in UTC
+        // Convert the token's local timestamp to UTC
+        const tokenTimestamp = new Date(userData.timestamp);
+        const localTimezoneOffset = tokenTimestamp.getTimezoneOffset() * 60000; // Get timezone offset in milliseconds
+        const utcTokenTimestamp = tokenTimestamp.getTime() + localTimezoneOffset; // Convert to UTC time
+
+        // Get the current timestamp in UTC
+        const currentTimestamp = Date.now();  // Current time in UTC (milliseconds)
+
+        // Log both timestamps for debugging
+        console.log("Token Timestamp (Local):", new Date(tokenTimestamp).toISOString());
+        console.log("Token Timestamp (UTC):", new Date(utcTokenTimestamp).toISOString());
+        console.log("Current Timestamp (UTC):", new Date(currentTimestamp).toISOString());
 
         // Calculate the time difference in minutes
-        const timeDifference = Math.abs(currentTimestamp - tokenTimestamp) / 1000 / 60;
+        const timeDifference = Math.abs(currentTimestamp - utcTokenTimestamp) / 1000 / 60;
 
+        // Check if the time difference exceeds 2 minutes
         if (timeDifference > 2) {
-            return res.status(400).json({ 
-                error: `Invalid token: timestamp difference is more than 2 minutes. Current: ${currentTimestamp}, Token: ${tokenTimestamp}` 
-            });
+            return res.status(400).json({ error: 'Invalid token: timestamp difference is more than 2 minutes' });
         }
 
+        // If valid, return the user data
         res.json({ data: userData });
     } catch (err) {
+        console.error("Error decoding token:", err);
         res.status(400).json({ error: 'Invalid token' });
     }
 };
