@@ -256,21 +256,22 @@ exports.handleQrScan = (req, res) => {
         const decoded = jwt.verify(token, secretKey);
         const userData = JSON.parse(decoded.data);
 
-        // Convert the token's local timestamp to UTC
+        // Convert the token's local timestamp to a Date object
         const tokenTimestamp = new Date(userData.timestamp);
-        const localTimezoneOffset = tokenTimestamp.getTimezoneOffset() * 60000; // Get timezone offset in milliseconds
-        const utcTokenTimestamp = tokenTimestamp.getTime() + localTimezoneOffset; // Convert to UTC time
+        const localTimezoneOffset = tokenTimestamp.getTimezoneOffset() * 60000; // Offset in milliseconds
+        const utcTokenTimestamp = tokenTimestamp.getTime() + localTimezoneOffset; // Adjust token timestamp to UTC
 
         // Get the current timestamp in UTC
-        const currentTimestamp = Date.now();  // Current time in UTC (milliseconds)
+        const currentTimestamp = Date.now();  // Current UTC time in milliseconds
 
-        // Log both timestamps for debugging
-        console.log("Token Timestamp (Local):", new Date(tokenTimestamp).toISOString());
-        console.log("Token Timestamp (UTC):", new Date(utcTokenTimestamp).toISOString());
+        // Log both timestamps in UTC format for debugging
+        console.log("Token Timestamp (Local):", tokenTimestamp.toISOString());
+        console.log("Token Timestamp (Adjusted UTC):", new Date(utcTokenTimestamp).toISOString());
         console.log("Current Timestamp (UTC):", new Date(currentTimestamp).toISOString());
 
         // Calculate the time difference in minutes
         const timeDifference = Math.abs(currentTimestamp - utcTokenTimestamp) / 1000 / 60;
+        console.log(`Time Difference: ${timeDifference} minutes`);
 
         // Check if the time difference exceeds 2 minutes
         if (timeDifference > 2) {
