@@ -2,11 +2,7 @@ const { updateCashInHand, deductWalletAmount, addWalletAmount } = require('../se
 const sessionService = require('../services/sessionService');
 const jwt = require('jsonwebtoken');
 
-// Helper function to convert date to IST
-const convertToIST = (date) => {
-    const istOffset = 330; // IST offset in minutes (UTC+5:30)
-    return new Date(date.getTime() + (istOffset * 60 * 1000));
-};
+
 
 // Create a new session
 exports.createSession = async (req, res) => {
@@ -245,6 +241,13 @@ exports.renderAllSessionsPage = async (req, res) => {
     }
 };
 
+
+function convertToIST(date) {
+    // Convert a given date to IST (UTC+5:30)
+    const offsetIST = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+    return new Date(date.getTime() + offsetIST);
+}
+
 exports.handleQrScan = (req, res) => {
     const token = req.body.token;
     const secretKey = 'secret_key_123';
@@ -254,12 +257,17 @@ exports.handleQrScan = (req, res) => {
         const decoded = jwt.verify(token, secretKey);
         const userData = JSON.parse(decoded.data);
 
-        const tokenTimestamp = convertToIST(new Date(userData.timestamp)).getTime();
-        const currentTimestamp = convertToIST(new Date()).getTime();
-        const timeDifference = Math.abs(currentTimestamp - tokenTimestamp) / 1000 / 60; // Difference in minutes
+        // Parse the timestamp and convert both to IST
+        const tokenTimestampIST = convertToIST(new Date(userData.timestamp)).getTime();
+        const currentTimestampIST = convertToIST(new Date()).getTime();
+
+        // Calculate the time difference in minutes
+        const timeDifference = Math.abs(currentTimestampIST - tokenTimestampIST) / 1000 / 60;
 
         if (timeDifference > 2) {
-            return res.status(400).json({ error: 'Invalid token: timestamp difference is more than 2 minutes '+ currentTimestamp +", "+ tokenTimestamp });
+            return res.status(400).json({ 
+                error: `Invalid token: timestamp difference is more than 2 minutes. Current: ${currentTimestampIST}, Token: ${tokenTimestampIST}` 
+            });
         }
 
         res.json({ data: userData });
