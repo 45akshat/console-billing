@@ -140,12 +140,23 @@
                 console.log(totalPrice, sessionDuration)
                 return totalPrice * 0.85; // Apply 15% discount
             },
+            "15% off PC & PS": (sessionDuration, totalPrice) => {
+                console.log(totalPrice, sessionDuration)
+                return totalPrice * 0.85; // Apply 15% discount
+            },
             "15 Mins": (sessionDuration, totalPrice) => { //--- SELF-----
                 if (sessionDuration >= 1) {
                     const freeMinutes = Math.floor(sessionDuration) * 15; // 15 mins free per hour
                 }
                 return totalPrice;
             },
+            "15 min free gaming": (sessionDuration, totalPrice) => { //--- SELF-----
+                if (sessionDuration >= 1) {
+                    const freeMinutes = Math.floor(sessionDuration) * 15; // 15 mins free per hour
+                }
+                return totalPrice;
+            },
+            
             "30 Mins": (sessionDuration, totalPrice) => { //--- SELF-----
                 if (sessionDuration >= 1) {
                     const freeMinutes = Math.floor(sessionDuration) * 30; // 30 mins free per hour
@@ -154,6 +165,12 @@
                 return totalPrice;
             },
             "1 Hour": (sessionDuration, totalPrice) => { 
+                if (sessionDuration >= 1) {
+                    totalPrice -= totalPrice / sessionDuration; // Subtract the price equivalent of one hour
+                }
+                return totalPrice;
+            },
+            "1 hour free gaming":(sessionDuration, totalPrice) => { 
                 if (sessionDuration >= 1) {
                     totalPrice -= totalPrice / sessionDuration; // Subtract the price equivalent of one hour
                 }
