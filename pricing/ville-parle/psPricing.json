@@ -1,14 +1,14 @@
 {
     "non_members": {
-        "1_players": 180,
-        "2_players": 100,
-        "3_players": 93,
-        "4_players": 90
-    },
-    "members": {
-        "1_players": 120,
+        "1_players": 160,
         "2_players": 80,
         "3_players": 73,
         "4_players": 70
+    },
+    "members": {
+        "1_players": 100,
+        "2_players": 60,
+        "3_players": 56,
+        "4_players": 55
     }
 }

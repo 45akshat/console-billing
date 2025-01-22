@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users Data</title>
+  <link rel="stylesheet" href="/users/wallet.css">
+  <script>
+    function showSuccessPopup() {
+      alert('User wallet updated successfully');
+    }
+  </script>
+</head>
+<body>
+  <h1>Users Data</h1>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>UserID</th>
+        <th>Name</th>
+        <th>Wallet Info</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(user => { %>
+        <tr>
+          <td><%= user.UserID %></td>
+          <td><%= user.Name %></td>
+          <td><%= JSON.stringify(user.Wallet_Info) %></td>
+          <td>
+            <form action="/users/users/<%= user.UserID %>/wallet" method="POST" onsubmit="event.preventDefault(); updateWallet('<%= user.UserID %>');">
+              <input type="text" name="Wallet_Info" id="wallet_<%= user.UserID %>" value='<%= JSON.stringify(user.Wallet_Info) %>'>
+              <button type="submit">Update Wallet</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <script>
+    async function updateWallet(userID) {
+      const walletInfo = document.getElementById(`wallet_${userID}`).value;
+      const response = await fetch(`/users/users/${userID}/wallet`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ Wallet_Info: walletInfo })
+      });
+
+      if (response.ok) {
+        showSuccessPopup();
+      } else {
+        alert('Error updating wallet');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -96,11 +96,73 @@ const checkLoggedInToday = async (req, res) => {
   }
 };
 
+// Get all users with their wallet information
+const getAllUsersWithWallet = async (req, res) => {
+  try {
+    const users = await userService.getAllUsersWithWallet();
+    res.status(200).json({
+      message: 'Users with wallet info retrieved successfully',
+      users
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+};
+
+// Render the users' data page
+const renderUsersPage = async (req, res) => {
+  try {
+      // Get locationId from the decoded JWT user data
+  let locationId = req.user.Location_Id;
+
+  if (locationId !== 'admin') {
+    // Remove '-admin' from locationId if it contains it
+    locationId = locationId.includes('-admin') 
+        ? locationId.replace('-admin', '') 
+        : locationId;
+}
+
+
+  if (!locationId) {
+    return res.status(400).json({ message: 'Location ID is required' });
+  }
+
+    const users = await userService.getAllUsersWithWallet();
+    return res.render('users/index', { users });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+};
+
+// Update user wallet information
+const updateUserWallet = async (req, res) => {
+  try {
+    const userID = req.params.userID;
+    const walletInfo = JSON.parse(req.body.Wallet_Info);
+    const updatedUser = await userService.updateUserWallet(userID, walletInfo);
+    res.status(200).json({
+      message: 'User wallet updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+};
+
 module.exports = {
   createUser,
   getUserByUserID,
   updateUser,
   deleteUser,
   getAllUsers,
-  checkLoggedInToday
+  checkLoggedInToday,
+  getAllUsersWithWallet,
+  renderUsersPage,
+  updateUserWallet
 };

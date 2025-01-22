@@ -41,6 +41,23 @@ const updateUser = async (userID, updatedData) => {
   }
 };
 
+// Update user wallet information
+const updateUserWallet = async (userID, walletInfo) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { UserID: userID },
+      { Wallet_Info: walletInfo },
+      { new: true } // Return the updated user object
+    );
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
+  } catch (error) {
+    throw new Error(`Error updating wallet info: ${error.message}`);
+  }
+};
+
 // Delete user by UserID
 const deleteUser = async (userID) => {
   try {
@@ -64,6 +81,16 @@ const getAllUsers = async () => {
   }
 };
 
+// Get all users with their wallet information
+const getAllUsersWithWallet = async () => {
+  try {
+    const users = await User.find({}, 'UserID Name Wallet_Info');
+    return users;
+  } catch (error) {
+    throw new Error(`Error retrieving users with wallet info: ${error.message}`);
+  }
+};
+
 // Check if the user logged in today
 const checkLoggedInToday = async (userID) => {
   try {
@@ -83,5 +110,7 @@ module.exports = {
   updateUser,
   deleteUser,
   getAllUsers,
-  checkLoggedInToday
+  getAllUsersWithWallet,
+  checkLoggedInToday,
+  updateUserWallet
 };
