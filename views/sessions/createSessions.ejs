@@ -662,11 +662,7 @@ function updateCustomerIndexes() {
                         const pricingType = isMember ? 'members' : 'non_members';
                         totalPrice += ps_pricing[pricingType][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.5;
                        
-                        if(discount>0){
-                            totalPrice -= totalPrice * discount/100
-                        }
 
-                        document.getElementsByName('totalPrice')[0].value = totalPrice
 
                         if (isMember && wallet < totalPrice) {
                             disableEnableButton("true")
@@ -674,6 +670,19 @@ function updateCustomerIndexes() {
                             disableEnableButton("false")
                         }
                     }
+
+                    console.log(discount, totalPrice, "discount")
+
+if(discount>0){
+
+    totalPrice -= totalPrice * discount/100
+}
+
+
+document.getElementsByName('totalPrice')[0].value = totalPrice
+
+
+console.log(discount, totalPrice, "discount")
 
 
                 } else {
