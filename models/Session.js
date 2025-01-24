@@ -70,6 +70,11 @@ const sessionSchema = new mongoose.Schema({
         required: true,
         default: 0,
     },
+    cash_discount: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
     coupon: {
         type: String,
         default: null,

@@ -189,15 +189,17 @@ new Chart(timeCtx, {
                 online: acc.online + (parseFloat(session.payment.online) || 0),
                 wallet: acc.wallet + (parseFloat(session.payment.wallet) || 0),
                 discount: acc.discount + (parseFloat(session.discount) || 0),
+                cashDiscount: acc.cashDiscount + (parseFloat(session.cash_discount) || 0), // Add cash discount
                 total: acc.total + (parseFloat(session.totalPrice) || 0)
             };
-        }, { cash: 0, online: 0, wallet: 0, discount: 0, total: 0 });
+        }, { cash: 0, online: 0, wallet: 0, discount: 0, cashDiscount: 0, total: 0 });
 
         // Update totals in the table
         document.getElementById('totalCash').textContent = totals.cash.toFixed(2);
         document.getElementById('totalOnline').textContent = totals.online.toFixed(2);
         document.getElementById('totalWallet').textContent = totals.wallet.toFixed(2);
         document.getElementById('totalDiscount').textContent = totals.discount.toFixed(2);
+        document.getElementById('totalCashDiscount').textContent = totals.cashDiscount.toFixed(2); // Update total cash discount
         document.getElementById('grandTotal').textContent = totals.total.toFixed(2);
 
         // Add some styling to the totals row
@@ -305,6 +307,7 @@ new Chart(timeCtx, {
                 <th>Payment (Online)</th>
                 <th>Payment (Wallet)</th>
                 <th>Discount</th>
+                <th>Cash Discount</th> <!-- New Cash Discount Column -->
                 <th>Total Price</th>
                 <th>Coupon</th> <!-- New Coupon Column -->
                 <th>Created At</th>
@@ -338,6 +341,7 @@ new Chart(timeCtx, {
                         <td><%= session.payment.online %></td>
                         <td><%= session.payment.wallet %></td>
                         <td><%= session.discount %></td>
+                        <td><%= session.cash_discount %></td> <!-- Cash Discount Data -->
                         <td><%= session.totalPrice %></td>
                         <td><%= session.coupon ? session.coupon : 'N/A' %></td> <!-- Coupon Data -->
                         <td><%= new Date(session.createdAt).toLocaleString('en-GB', { timeZone: 'UTC' }) %></td>
@@ -384,12 +388,13 @@ new Chart(timeCtx, {
                     <td id="totalOnline">0</td>
                     <td id="totalWallet">0</td>
                     <td id="totalDiscount">0</td>
+                    <td id="totalCashDiscount">0</td> <!-- Total Cash Discount -->
                     <td id="grandTotal">0</td>
                     <td colspan="3"></td>
                 </tr>
             <% } else { %>
                 <tr>
-                    <td colspan="14">No sessions found for the selected date</td>
+                    <td colspan="15">No sessions found for the selected date</td> <!-- Updated colspan -->
                 </tr>
             <% } %>
         </tbody>

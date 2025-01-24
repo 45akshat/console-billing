@@ -36,6 +36,11 @@ exports.createSession = async (req, res) => {
             await deductWalletAmount(sessionData.UserID, sessionData.totalPrice);
         }
 
+        // Apply cash discount
+        if (sessionData.cash_discount > 0) {
+            sessionData.totalPrice -= sessionData.cash_discount;
+        }
+
         // Log "Oops" if primaryUserID is null
         if (!sessionData.primaryUserID) {
             console.log("Oops");
@@ -78,7 +83,11 @@ exports.updateSession = async (req, res) => {
             await deductWalletAmount(oldSessionData.UserID, sessionData.totalPrice);
         }
 
-        
+        // Apply cash discount
+        if (sessionData.cash_discount > 0) {
+            sessionData.totalPrice -= sessionData.cash_discount;
+        }
+
         if (sessionData.isMember == false) {
             await updateCashInHand(oldSessionData.Location_Id, -oldSessionData.payment.cash);
             await updateCashInHand(oldSessionData.Location_Id, sessionData.payment.cash);

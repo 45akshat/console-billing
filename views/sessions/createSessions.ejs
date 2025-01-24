@@ -65,8 +65,11 @@
 
                 <label for="sessionDuration">Session Duration (in hours)</label>
                 <select name="customers[0][sessionDuration]" required>
+                    <option value="0.25">0.25</option>
                     <option value="0.5">0.5</option>
                     <option value="1">1</option>
+                    <option value="1.25">1.25</option>
+                    <option value="1.5">1.5</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
@@ -101,8 +104,12 @@
         </div>
 
         <!-- Discount and Total Price -->
-        <label for="discount">Discount</label>
+        <label for="discount">Discount (%)</label>
         <input type="number" id="discount" name="discount" min="0" value="0" >
+
+        <!-- Cash Discount -->
+        <label for="cashDiscount">Cash Discount</label>
+        <input type="number" id="cashDiscount" name="cash_discount" min="0" value="0">
 
         <!-- Coupon Code -->
         <label for="couponCode">Coupon Code</label>
@@ -460,6 +467,7 @@ function updateCustomerIndexes() {
                 const primaryContact = formData.get("primaryContact[phoneNumber]");
                 const game = document.getElementById("gameDropdown").value;
                 const totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
+                
 
                 // Collect customer data
                 let customers = [];
@@ -514,6 +522,7 @@ function updateCustomerIndexes() {
                         wallet: wallet,
                     },
                     discount: parseFloat(document.getElementById("discount").value) || 0,
+                    cash_discount: parseFloat(document.getElementById("cashDiscount").value) || 0,
                     totalPrice,
                     couponCode: document.getElementById("couponCode").value.trim(), // Add coupon code if applicable
                     createdAt: istTime.toISOString() // Add createdAt field with IST time
@@ -568,7 +577,8 @@ function updateCustomerIndexes() {
                 const platform = document.getElementById("platformInput").value;
                 const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
                 const wallet = document.getElementById(`primaryWallet`).value;
-                let discount = document.getElementById("discount").value
+                let discount = document.getElementById("discount").value;
+                let cashDiscount = document.getElementById("cashDiscount").value;
 
                 if (platform === 'PC') {
                     for (let i = 0; i < customerCount; i++) {
@@ -577,25 +587,21 @@ function updateCustomerIndexes() {
                         let customerPrice;
                         let pricePerHour = 0;
 
-                        if (sessionDuration === 0.5) {
-                            pricePerHour = pricing["1_HOUR"] / 2; // Half-hour rate
-                        }else if (sessionDuration === 1) {
-                            pricePerHour = pricing["1_HOUR"]; // Half-hour rate
-                        } else if (sessionDuration == 2) {
-                            pricePerHour = pricing["2_HOURS"];
-                        } else if (sessionDuration == 12) {
-                            pricePerHour = pricing["12_HOUR"];
+                        if(sessionDuration < 2){
+                            customerPrice = pricing["1_HOUR"]/4 * customerCount * sessionDuration/0.25
+                            console.log(customerPrice, "customerPrice")
                         }
-                        else {
-                            pricePerHour = pricing["3_HOURS_AND_MORE"];
+                        else if(sessionDuration < 3){
+                            customerPrice = pricing["2_HOURS"]/4 * customerCount * sessionDuration/0.25
+
+                        }
+                        else if(sessionDuration < 12){
+                            customerPrice = pricing["3_HOURS_AND_MORE"]/4 * customerCount * sessionDuration/0.25
+
+                        }else{
+                            customerPrice = pricing["2_HOURS"];
                         }
 
-                        if (sessionDuration < 2) {
-                            customerPrice = pricePerHour;
-                        } else {
-
-                            customerPrice = pricePerHour * sessionDuration;
-                        }
 
                         totalPrice += customerPrice;
 
@@ -606,6 +612,9 @@ function updateCustomerIndexes() {
                                             
                         if(discount>0){
                             totalPrice -= totalPrice * discount/100
+                        }
+                        if (cashDiscount > 0) {
+                            totalPrice -= cashDiscount;
                         }
                         document.getElementsByName('totalPrice')[0].value = totalPrice
 
@@ -636,7 +645,7 @@ function updateCustomerIndexes() {
                     console.log("Customers:", customers);
 
 
-                    let timeframe = 0.5; // 0.5-hour blocks
+                    let timeframe = 0.25; // 0.5-hour blocks
                     let activeCustomers = {}; // To track active customers during each time block
 
                     // Loop through each customer and calculate their active session time
@@ -651,6 +660,7 @@ function updateCustomerIndexes() {
                             if (!activeCustomers[currentBlock]) {
                                 activeCustomers[currentBlock] = [];
                             }
+                            
 
                             activeCustomers[currentBlock].push(customer.name);
                         }
@@ -664,7 +674,7 @@ function updateCustomerIndexes() {
                         // Use member or non-member pricing based on isMember status
                         const pricingType = isMember ? 'members' : 'non_members';
                         console.log(`Active customers for ${block} hours:`, activeCustomers[block]);
-                        totalPrice += ps_pricing[pricingType][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.5;
+                        totalPrice += ps_pricing[pricingType][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.25;
                        console.log(totalPrice, "totalPrice")
                         document.getElementsByName('totalPrice')[0].value = totalPrice
                        
@@ -682,6 +692,9 @@ function updateCustomerIndexes() {
 if(discount>0){
 
     totalPrice -= totalPrice * discount/100
+}
+if (cashDiscount > 0) {
+    totalPrice -= cashDiscount;
 }
 
 
