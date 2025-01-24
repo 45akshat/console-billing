@@ -540,6 +540,7 @@ games.forEach(game => {
                 const platform = document.getElementById("platformInput").value;
                 const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
                 const wallet = document.getElementById(`primaryWallet`).value;
+                let discount = document.getElementById("discount").value
 
 
                 if (platform === 'PC') {
