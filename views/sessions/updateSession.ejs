@@ -567,6 +567,11 @@ games.forEach(game => {
                             customerPrice = pricePerHour * sessionDuration;
                         }
                         totalPrice += customerPrice;
+                        
+                        if(discount>0){
+                            totalPrice -= totalPrice * discount/100
+                        }
+
 
                         customers.push({ name, sessionDuration, customerPrice });
                     }
@@ -622,7 +627,10 @@ games.forEach(game => {
 
                     // Loop to log active customers for each time block
                     for (let block in activeCustomers) {
-                        totalPrice += ps_pricing['members'][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.5
+                        const pricingType = isMember ? 'members' : 'non_members';
+                        totalPrice += ps_pricing[pricingType][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.5;
+                       
+
                         document.getElementsByName('totalPrice')[0].value = totalPrice
 
                         // if (isMember && wallet < totalPrice) {
@@ -631,6 +639,17 @@ games.forEach(game => {
                         //     disableEnableButton("false")
                         // }
                     }
+
+                    if(discount>0){
+
+totalPrice -= totalPrice * discount/100
+}
+
+
+document.getElementsByName('totalPrice')[0].value = totalPrice
+
+
+console.log(discount, totalPrice, "discount")
 
 
                 } else {
