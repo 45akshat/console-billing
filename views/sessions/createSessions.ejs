@@ -599,13 +599,16 @@ function updateCustomerIndexes() {
 
                         totalPrice += customerPrice;
 
-                        
-                        if(discount>0){
-                            totalPrice -= totalPrice * discount/100
-                        }
+
 
                         customers.push({ name, sessionDuration, customerPrice });
                     }
+                                            
+                        if(discount>0){
+                            totalPrice -= totalPrice * discount/100
+                        }
+                        document.getElementsByName('totalPrice')[0].value = totalPrice
+
 
                     console.log("Platform:", platform);
                     console.log("Customers:", customers);
@@ -660,7 +663,10 @@ function updateCustomerIndexes() {
                     for (let block in activeCustomers) {
                         // Use member or non-member pricing based on isMember status
                         const pricingType = isMember ? 'members' : 'non_members';
+                        console.log(`Active customers for ${block} hours:`, activeCustomers[block]);
                         totalPrice += ps_pricing[pricingType][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.5;
+                       console.log(totalPrice, "totalPrice")
+                        document.getElementsByName('totalPrice')[0].value = totalPrice
                        
 
 

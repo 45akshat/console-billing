@@ -119,7 +119,7 @@
 
         // Rewards Logic
         const rewards = {
-            "5_hours_pay_4": (sessionDuration, totalPrice) => {
+            "Pay for 4 get 5 hours": (sessionDuration, totalPrice) => {
                 if (sessionDuration >= 4) {
                     // Apply logic for 4 hours pay 5 hours
                     totalPrice = totalPrice * 4 / 5; // Book 2 hours, pay for 3 hours
@@ -128,54 +128,71 @@
                 }
                 return totalPrice;
             },
-            "15_percent_off_coupon_pc_ps": (sessionDuration, totalPrice) => {
+            "15% off": (sessionDuration, totalPrice) => {
                 console.log(totalPrice, sessionDuration)
                 return totalPrice * 0.85; // Apply 15% discount
             },
-            "15_minutes_free_per_hour": (sessionDuration, totalPrice) => { //--- SELF-----
+            "15% off PC & PS": (sessionDuration, totalPrice) => {
+                console.log(totalPrice, sessionDuration)
+                return totalPrice * 0.85; // Apply 15% discount
+            },
+            "15 Mins": (sessionDuration, totalPrice) => { //--- SELF-----
                 if (sessionDuration >= 1) {
                     const freeMinutes = Math.floor(sessionDuration) * 15; // 15 mins free per hour
                 }
                 return totalPrice;
             },
-            "30_minutes_free_per_hour": (sessionDuration, totalPrice) => { //--- SELF-----
+            "15 min free gaming": (sessionDuration, totalPrice) => { //--- SELF-----
+                if (sessionDuration >= 1) {
+                    const freeMinutes = Math.floor(sessionDuration) * 15; // 15 mins free per hour
+                }
+                return totalPrice;
+            },
+            
+            "30 Mins": (sessionDuration, totalPrice) => { //--- SELF-----
                 if (sessionDuration >= 1) {
                     const freeMinutes = Math.floor(sessionDuration) * 30; // 30 mins free per hour
                     totalPrice -= (freeMinutes / 60) * totalPrice; // Subtract the price equivalent of free time
                 }
                 return totalPrice;
             },
-            "1_hour_free": (sessionDuration, totalPrice) => { 
+            "1 Hour": (sessionDuration, totalPrice) => { 
                 if (sessionDuration >= 1) {
                     totalPrice -= totalPrice / sessionDuration; // Subtract the price equivalent of one hour
                 }
                 return totalPrice;
             },
-            "book_2_hours_get_3": (sessionDuration, totalPrice) => {  
+            "1 hour free gaming":(sessionDuration, totalPrice) => { 
+                if (sessionDuration >= 1) {
+                    totalPrice -= totalPrice / sessionDuration; // Subtract the price equivalent of one hour
+                }
+                return totalPrice;
+            },
+            "Pay for 2 get 3 hours": (sessionDuration, totalPrice) => {  
                 if (sessionDuration === 2) {
                     totalPrice = totalPrice * 2 / 3; // Book 2 hours, pay for 3 hours
                 }
                 return totalPrice;
             },
-            "pay_for_4_players_book_5": (sessionDuration, totalPrice, platform) => {
+            "Buy 4 Get 1": (sessionDuration, totalPrice, platform) => {
                 if (platform === 'PC') {
                     totalPrice = totalPrice * 4 / 5; // Book for 5 players but pay for 4 (only applicable for PC)
                 }
                 return totalPrice;
             },
-            "day_pass_100_off": (sessionDuration, totalPrice, platform) => {
+            "1 Day": (sessionDuration, totalPrice, platform) => {
                 if (platform === 'PC' && sessionDuration==12) {
                     totalPrice -= 100; // Apply Rs 100 off for PC Day pass
                 }
                 return totalPrice;
             },
-            "50_percent_off_ps": (sessionDuration, totalPrice, platform) => {
+            "50% off on PS": (sessionDuration, totalPrice, platform) => {
                 if (platform === 'PS') {
                     totalPrice *= 0.5; // Apply 50% off for PS gaming
                 }
                 return totalPrice;
             },
-            "25_percent_off_coupon_ps": (sessionDuration, totalPrice, platform) => {
+            "25% off": (sessionDuration, totalPrice, platform) => {
                 if (platform === 'PS') {
                     totalPrice *= 0.75; // Apply 25% off for PS gaming
                 }
@@ -395,13 +412,30 @@ games.forEach(game => {
         function removeCustomer(button) {
             const customersContainer = document.getElementById('customersContainer');
             const customerDiv = button.parentElement;
-
             if (customersContainer.children.length > 1) {
-                customerDiv.remove();
+                customerDiv.remove(); // Remove the selected customer
+                customerCount--; // Decrement the customer count
+                updateCustomerIndexes(); // Update the indexes of remaining customers
             } else {
                 alert("At least one customer must remain.");
             }
         }
+
+        // Function to update the indexes in the names and attributes of customer fields
+function updateCustomerIndexes() {
+    const customerDivs = document.querySelectorAll('#customersContainer .customer');
+    customerDivs.forEach((div, index) => {
+        const inputs = div.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            const nameAttribute = input.getAttribute('name');
+            if (nameAttribute) {
+                const updatedName = nameAttribute.replace(/\[\d+\]/, `[${index}]`);
+                input.setAttribute('name', updatedName);
+            }
+        });
+    });
+}
+
 
 
         function disableEnableButton(bool) {
@@ -568,15 +602,18 @@ games.forEach(game => {
                             customerPrice = pricePerHour * sessionDuration;
                         }
                         totalPrice += customerPrice;
-                        
-                        if(discount>0){
-                            totalPrice -= totalPrice * discount/100
-                        }
 
 
                         customers.push({ name, sessionDuration, customerPrice });
                     }
 
+                                                              
+                    if(discount>0){
+                            totalPrice -= totalPrice * discount/100
+                        }
+                        document.getElementsByName('totalPrice')[0].value = totalPrice
+
+                        
                     console.log("Platform:", platform);
                     console.log("Customers:", customers);
                     console.log("Total Price:", totalPrice);
@@ -629,10 +666,12 @@ games.forEach(game => {
                     // Loop to log active customers for each time block
                     for (let block in activeCustomers) {
                         const pricingType = isMember ? 'members' : 'non_members';
+                        console.log(`Active customers for ${block} hours:`, activeCustomers[block]);
                         totalPrice += ps_pricing[pricingType][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.5;
-                       
+                       console.log(totalPrice, "totalPrice")
 
                         document.getElementsByName('totalPrice')[0].value = totalPrice
+
 
                         // if (isMember && wallet < totalPrice) {
                         //     disableEnableButton("true")
