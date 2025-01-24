@@ -528,7 +528,7 @@ games.forEach(game => {
                 const target = e.target;
 
                 // Check if the change occurred in a customer name or session duration field
-                if (target.name && (target.name.includes('customers') && (target.name.includes('name') || target.name.includes('sessionDuration')))) {
+                if (target.name && (target.name.includes('customers') && (target.name.includes('name') || target.name.includes('sessionDuration'))) || target.name.includes('discount') ) {
                     calculateTotalPrice();
                 }
             });
