@@ -62,9 +62,9 @@
             
                         <label for="sessionDuration<%= index %>">Session Duration (in hours)</label>
                         <select name="customers[<%= index %>][sessionDuration]" required>
-                            <% [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 24].forEach(duration => { %>
+                            <% [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7, 7.25, 7.5, 7.75, 8, 12].forEach(duration => { %>
                                 <option value="<%= duration %>" <%= customer.sessionDuration == duration ? 'selected' : '' %>>
-                                    <%= duration == 24 ? '1 Day' : duration %>
+                                    <%= duration == 12 ? '1 Day' : duration %>
                                 </option>
                             <% }) %>
                         </select>
@@ -95,6 +95,10 @@
             <!-- Discount and Total Price -->
             <label for="discount">Discount</label>
             <input type="number" id="discount" name="discount" min="0" value="<%= session.discount %>">
+
+            <!-- Cash Discount -->
+            <label for="cashDiscount">Cash Discount</label>
+            <input type="number" id="cashDiscount" name="cash_discount" min="0" value="<%= session.cash_discount %>">
 
             <!-- Coupon Code -->
             <label for="couponCode">Coupon Code</label>
@@ -221,6 +225,7 @@
                 const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
                 const wallet = document.getElementById(`primaryWallet`).value;
                 let totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
+                let cashDiscount = parseFloat(document.getElementById("cashDiscount").value) || 0; // Fetch cash discount
 
 
                 let longestSessionDuration = 0; // Initialize the variable for longest session duration
@@ -390,14 +395,37 @@ games.forEach(game => {
 
                 <label for="sessionDuration">Session Duration (in hours)</label>
                 <select name="customers[${customerCount}][sessionDuration]" required>
+                    <option value="0.25">0.25</option>
                     <option value="0.5">0.5</option>
+                    <option value="0.75">0.75</option>
                     <option value="1">1</option>
+                    <option value="1.25">1.25</option>
+                    <option value="1.5">1.5</option>
+                    <option value="1.75">1.75</option>
                     <option value="2">2</option>
+                    <option value="2.25">2.25</option>
+                    <option value="2.5">2.5</option>
+                    <option value="2.75">2.75</option>
                     <option value="3">3</option>
+                    <option value="3.25">3.25</option>
+                    <option value="3.5">3.5</option>
+                    <option value="3.75">3.75</option>
                     <option value="4">4</option>
+                    <option value="4.25">4.25</option>
+                    <option value="4.5">4.5</option>
+                    <option value="4.75">4.75</option>
                     <option value="5">5</option>
+                    <option value="5.25">5.25</option>
+                    <option value="5.5">5.5</option>
+                    <option value="5.75">5.75</option>
                     <option value="6">6</option>
+                    <option value="6.25">6.25</option>
+                    <option value="6.5">6.5</option>
+                    <option value="6.75">6.75</option>
                     <option value="7">7</option>
+                    <option value="7.25">7.25</option>
+                    <option value="7.5">7.5</option>
+                    <option value="7.75">7.75</option>
                     <option value="8">8</option>
                     <option value="12">1 Day</option>
                 </select>
@@ -466,6 +494,7 @@ function updateCustomerIndexes() {
                 const primaryContact = formData.get("primaryContact[phoneNumber]");
                 const game = document.getElementById("gameDropdown").value;
                 const totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
+                const cashDiscount = parseFloat(document.getElementById("cashDiscount").value) || 0;
 
                 // Collect customer data
                 let customers = [];
@@ -504,6 +533,7 @@ function updateCustomerIndexes() {
                         wallet: wallet,
                     },
                     discount: parseFloat(document.getElementById("discount").value) || 0,
+                    cash_discount: cashDiscount,
                     totalPrice,
                 };
 
@@ -526,6 +556,7 @@ function updateCustomerIndexes() {
                         wallet: <%= session.payment.wallet %>,
                     },
                     discount: <%= session.discount %>,
+                    cash_discount: <%= session.cash_discount %>,
                     totalPrice: <%= session.totalPrice %>,
                 };
 
@@ -575,6 +606,7 @@ function updateCustomerIndexes() {
                 const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
                 const wallet = document.getElementById(`primaryWallet`).value;
                 let discount = document.getElementById("discount").value
+                let cashDiscount = parseFloat(document.getElementById("cashDiscount").value) || 0;
 
 
                 if (platform === 'PC') {
@@ -582,53 +614,36 @@ function updateCustomerIndexes() {
                         const name = formData.get(`customers[${i}][name]`);
                         const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
                         let customerPrice;
-                        let pricePerHour = 0;
 
-                        if (sessionDuration === 0.5) {
-                            pricePerHour = pricing["1_HOUR"] / 2; // Half-hour rate
-                        } else if (sessionDuration <= 2) {
-                            pricePerHour = pricing["1_HOUR"];
-                        } else if (sessionDuration == 12) {
-                            pricePerHour = pricing["12_HOUR"];
-                        }
-                        else {
-                            pricePerHour = pricing["3_HOURS_AND_MORE"];
-                        }
-
-                        if (sessionDuration <= 2) {
-                            customerPrice = pricePerHour;
+                        if (sessionDuration < 2) {
+                            customerPrice = pricing["1_HOUR"] / 4 * sessionDuration / 0.25;
+                        } else if (sessionDuration < 3) {
+                            customerPrice = pricing["2_HOURS"] / 4 * sessionDuration / 0.25;
+                        } else if (sessionDuration < 12) {
+                            customerPrice = pricing["3_HOURS_AND_MORE"] / 4 * sessionDuration / 0.25;
                         } else {
-
-                            customerPrice = pricePerHour * sessionDuration;
+                            customerPrice = pricing["12_HOUR"];
                         }
+
                         totalPrice += customerPrice;
-
-
                         customers.push({ name, sessionDuration, customerPrice });
                     }
 
-                                                              
                     if(discount>0){
-                            totalPrice -= totalPrice * discount/100
-                        }
-                        document.getElementsByName('totalPrice')[0].value = totalPrice
+                        totalPrice -= totalPrice * discount/100
+                    }
+                    if (cashDiscount > 0) {
+                        totalPrice -= cashDiscount;
+                    }
+                    document.getElementsByName('totalPrice')[0].value = totalPrice
 
-                        
+                    
                     console.log("Platform:", platform);
                     console.log("Customers:", customers);
                     console.log("Total Price:", totalPrice);
 
-                    // if (isMember && wallet < totalPrice) {
-                    //     disableEnableButton("true")
-                    // } else {
-                    //     disableEnableButton("false")
-                    // }
-                    // Set total price in the form
                     document.getElementById("totalPrice").value = totalPrice;
                 } else if (platform === 'PS') {
-
-
-
                     for (let i = 0; i < customerCount; i++) {
                         customers.push({
                             name: formData.get(`customers[${i}][name]`),
@@ -636,22 +651,15 @@ function updateCustomerIndexes() {
                         });
                     }
 
-                    console.log("Form Data:", formData);
-                    console.log("Customers:", customers);
-
-
-                    let timeframe = 0.5; // 0.5-hour blocks
+                    let timeframe = 0.25; // 0.25-hour blocks
                     let activeCustomers = {}; // To track active customers during each time block
 
-                    // Loop through each customer and calculate their active session time
                     customers.forEach(customer => {
                         let sessionTime = customer.sessionDuration;
 
-                        // Split customer session into 0.5 hour blocks and record active customers for each block
                         for (let i = 0; i < sessionTime; i += timeframe) {
-                            let currentBlock = i + timeframe;  // Represents the end of each block (e.g., 0.5, 1.0, etc.)
+                            let currentBlock = i + timeframe;
 
-                            // Store the active customer in the appropriate block
                             if (!activeCustomers[currentBlock]) {
                                 activeCustomers[currentBlock] = [];
                             }
@@ -660,38 +668,19 @@ function updateCustomerIndexes() {
                         }
                     });
 
-                    console.log(activeCustomers);
-
-
-                    // Loop to log active customers for each time block
                     for (let block in activeCustomers) {
                         const pricingType = isMember ? 'members' : 'non_members';
-                        console.log(`Active customers for ${block} hours:`, activeCustomers[block]);
-                        totalPrice += ps_pricing[pricingType][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.5;
-                       console.log(totalPrice, "totalPrice")
-
-                        document.getElementsByName('totalPrice')[0].value = totalPrice
-
-
-                        // if (isMember && wallet < totalPrice) {
-                        //     disableEnableButton("true")
-                        // } else {
-                        //     disableEnableButton("false")
-                        // }
+                        totalPrice += ps_pricing[pricingType][`${activeCustomers[block].length}_players`] * activeCustomers[block].length * 0.25;
                     }
 
                     if(discount>0){
+                        totalPrice -= totalPrice * discount/100
+                    }
+                    if (cashDiscount > 0) {
+                        totalPrice -= cashDiscount;
+                    }
 
-totalPrice -= totalPrice * discount/100
-}
-
-
-document.getElementsByName('totalPrice')[0].value = totalPrice
-
-
-console.log(discount, totalPrice, "discount")
-
-
+                    document.getElementsByName('totalPrice')[0].value = totalPrice;
                 } else {
                     alert("Please select a valid platform.");
                 }
