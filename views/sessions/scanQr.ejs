@@ -95,7 +95,7 @@
             // Set a timeout to process the input after a pause
             inputTimeout = setTimeout(async () => {
                 let token = event.target.value;
-                if (token && token[0] === token[0].toUpperCase()) {
+                if (token && token[0]=="E") {
                     token = inverseCapitalization(token);
                 }
                 try {
