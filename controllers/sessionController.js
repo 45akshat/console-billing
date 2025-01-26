@@ -36,11 +36,6 @@ exports.createSession = async (req, res) => {
             await deductWalletAmount(sessionData.UserID, sessionData.totalPrice);
         }
 
-        // Apply cash discount
-        if (sessionData.cash_discount > 0) {
-            sessionData.totalPrice -= sessionData.cash_discount;
-        }
-
         // Log "Oops" if primaryUserID is null
         if (!sessionData.primaryUserID) {
             console.log("Oops");
