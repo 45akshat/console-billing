@@ -75,6 +75,16 @@
         const inputField = document.getElementById('qrInput');
         const loader = document.getElementById('loader');
 
+        function inverseCapitalization(str) {
+            return str.split('').map(char => {
+                if (char === char.toUpperCase()) {
+                    return char.toLowerCase();
+                } else {
+                    return char.toUpperCase();
+                }
+            }).join('');
+        }
+
         inputField.addEventListener('input', function (event) {
             // Clear the previous timeout
             clearTimeout(inputTimeout);
@@ -84,7 +94,10 @@
 
             // Set a timeout to process the input after a pause
             inputTimeout = setTimeout(async () => {
-                const token = event.target.value;
+                let token = event.target.value;
+                if (token && token[0] === token[0].toUpperCase()) {
+                    token = inverseCapitalization(token);
+                }
                 try {
                     const response = await fetch('/sessions/scanQr', {
                         method: 'POST',
