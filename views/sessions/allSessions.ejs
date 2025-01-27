@@ -252,9 +252,11 @@ new Chart(timeCtx, {
                     <label for="location">Location: </label>
                     <select id="location" name="location">
                         <option value="">All Locations</option>
-                        <% locations.forEach(location => { %>
-                            <option value="<%= location %>"><%= location %></option>
-                        <% }) %>
+                        <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
+                            <% locations.forEach(location => { %>
+                                <option value="<%= location %>"><%= location %></option>
+                            <% }) %>
+                        <% } %>
                     </select>
                 <% } %>
                 <button type="submit">Filter</button>
