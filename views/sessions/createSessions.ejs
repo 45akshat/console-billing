@@ -662,6 +662,7 @@ function updateCustomerIndexes() {
                             totalPrice -= cashDiscount;
                         }
 
+                        totalPrice = Math.round(totalPrice); // Round off to the nearest integer
                         document.getElementsByName('totalPrice')[0].value = totalPrice
 
 
@@ -743,7 +744,7 @@ if (cashDiscount > 0) {
     totalPrice -= cashDiscount;
 }
 
-
+totalPrice = Math.round(totalPrice); // Round off to the nearest integer
 document.getElementsByName('totalPrice')[0].value = totalPrice
 
 
