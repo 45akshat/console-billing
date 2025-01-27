@@ -662,12 +662,6 @@ function updateCustomerIndexes() {
                             totalPrice -= cashDiscount;
                         }
 
-                        // Round off the total price to the nearest even number
-                        totalPrice = Math.round(totalPrice / 10) * 10;
-                        if (totalPrice % 2 !== 0) {
-                            totalPrice += totalPrice % 10 >= 5 ? 1 : -1;
-                        }
-
                         document.getElementsByName('totalPrice')[0].value = totalPrice
 
 
@@ -749,11 +743,6 @@ if (cashDiscount > 0) {
     totalPrice -= cashDiscount;
 }
 
-// Round off the total price to the nearest even number
-totalPrice = Math.round(totalPrice / 10) * 10;
-if (totalPrice % 2 !== 0) {
-    totalPrice += totalPrice % 10 >= 5 ? 1 : -1;
-}
 
 document.getElementsByName('totalPrice')[0].value = totalPrice
 
