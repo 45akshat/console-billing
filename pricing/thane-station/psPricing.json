@@ -8,7 +8,7 @@
     "members": {
         "1_players": 100,
         "2_players": 60,
-        "3_players": 53,
+        "3_players": 53.3,
         "4_players": 50
     }
 }
