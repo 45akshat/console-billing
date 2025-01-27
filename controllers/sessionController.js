@@ -225,28 +225,31 @@ exports.renderAllSessionsPage = async (req, res) => {
             console.log("sessions/create/location/");
         }
 
-        // Get the date from the query parameter, default to today's date if not provided
+        // Get the start and end dates from the query parameters
         const istDate = convertToIST(new Date());
-        const selectedDate = req.query.date || istDate.toISOString().split('T')[0]; // Default to today's date (YYYY-MM-DD)
+        const startDate = req.query.startDate || istDate.toISOString().split('T')[0];
+        const endDate = req.query.endDate || istDate.toISOString().split('T')[0];
+        const location = req.query.location || user.Location_Id;
 
-        // Get sessions for the selected date
-        const sessions = await sessionService.getSessionsForDate(selectedDate, user.Location_Id);
-
-
+        // Get sessions for the specified date range and location
+        const sessions = await sessionService.getSessionsForDateRange(startDate, endDate, location);
 
         if (!sessions || sessions.length === 0) {
             return res.render('sessions/allSessions', {
                 sessions: [],
-                selectedDate: selectedDate,
+                startDate: startDate,
+                endDate: endDate,
                 user, // Pass user to the view
             });
         }
 
-        // Render the page and pass the sessions and selected date
+        // Render the page and pass the sessions, date range, and locations
         res.render('sessions/allSessions', {
             sessions,
-            selectedDate: selectedDate,
+            startDate: startDate,
+            endDate: endDate,
             user, // Pass user to the view
+            locations: await sessionService.getAllLocations(), // Fetch all locations for the dropdown
         });
     } catch (error) {
         console.error('Error fetching sessions:', error);

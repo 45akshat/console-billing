@@ -129,3 +129,54 @@ exports.getSessionsForDate = async (date, Location_Id) => {
     }
 };
 
+// Get sessions for a specific date range and location
+exports.getSessionsForDateRange = async (startDate, endDate, Location_Id) => {
+    try {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        // Adjust the dates to IST (Indian Standard Time)
+        const IST_OFFSET = 330 * 60 * 1000; // IST is UTC+5:30
+        const startOfDay = new Date(start.getTime() + IST_OFFSET);
+        startOfDay.setUTCHours(0, 0, 0, 0); // Set to the start of the day in UTC
+
+        const endOfDay = new Date(end.getTime() + IST_OFFSET);
+        endOfDay.setUTCHours(23, 59, 59, 999); // Set to the end of the day in UTC
+
+        // Build the query based on Location_Id
+        const query = {
+            createdAt: {
+                $gte: startOfDay, // Start of the range
+                $lte: endOfDay,   // End of the range
+            },
+        };
+
+        // If Location_Id is not 'admin', filter by Location_Id
+        if (Location_Id !== 'admin') {
+            // Remove '-admin' from Location_Id if it contains it
+            query.Location_Id = Location_Id.includes('-admin') 
+                ? Location_Id.replace('-admin', '') 
+                : Location_Id;
+        }
+
+        // Query the database for sessions
+        const sessions = await Session.find(query);
+
+        return sessions;
+    } catch (error) {
+        console.error('Error retrieving sessions for date range:', error);
+        throw new Error('Unable to fetch sessions for the specified date range.');
+    }
+};
+
+// Get all unique locations
+exports.getAllLocations = async () => {
+    try {
+        const locations = await Session.distinct('Location_Id');
+        return locations;
+    } catch (error) {
+        console.error('Error fetching locations:', error);
+        throw new Error('Error fetching locations');
+    }
+};
+

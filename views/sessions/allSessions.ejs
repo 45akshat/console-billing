@@ -61,8 +61,10 @@
                 loadingSpinner.style.display = 'none';
             }
 
-            const dateInput = document.getElementById('sessionDate');
-            dateInput.value = "<%= selectedDate %>";
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            startDateInput.value = "<%= startDate %>";
+            endDateInput.value = "<%= endDate %>";
 
             // Get sessions data for the selected date
             const sessions = JSON.parse(`<%- JSON.stringify(sessions) %>`); // Safely inject sessions as a JSON string and parse it
@@ -242,10 +244,19 @@ new Chart(timeCtx, {
         <!-- Date Filter Section -->
         <section class="filter-section">
             <form method="GET" action="/sessions/all" class="filter-form">
-                <label for="sessionDate">Select Date: </label>
-                <input type="date" id="sessionDate" name="date" value="<%= selectedDate %>" required>
-
-                
+                <label for="startDate">Start Date: </label>
+                <input type="date" id="startDate" name="startDate" value="<%= startDate %>" required>
+                <label for="endDate">End Date: </label>
+                <input type="date" id="endDate" name="endDate" value="<%= endDate %>" required>
+                <% if (user.Location_Id === 'admin') { %>
+                    <label for="location">Location: </label>
+                    <select id="location" name="location">
+                        <option value="">All Locations</option>
+                        <% locations.forEach(location => { %>
+                            <option value="<%= location %>"><%= location %></option>
+                        <% }) %>
+                    </select>
+                <% } %>
                 <button type="submit">Filter</button>
             </form>
         </section>
