@@ -67,7 +67,7 @@
             endDateInput.value = "<%= endDate %>";
 
             // Get sessions data for the selected date
-            const sessions = JSON.parse(`<%- JSON.stringify(sessions) %>`); // Safely inject sessions as a JSON string and parse it
+            const sessions = JSON.parse(`<%- JSON.stringify(sessions).replace(/\\/g, '\\\\').replace(/'/g, '\\\'').replace(/"/g, '\\"') %>`); // Safely inject sessions as a JSON string and parse it
             console.log(sessions)
             // Calculate total revenue
             const totalRevenue = sessions.reduce((acc, session) => acc + session.totalPrice, 0);
