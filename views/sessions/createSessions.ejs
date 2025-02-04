@@ -285,7 +285,7 @@
                 console.log(data);
 
                 // Check if the coupon is valid
-                if (response.ok && data && data.Code === couponCode) {
+                if (response.ok && data && data.Code === couponCode && data.Validity != 'Used') {
                     // Extract reward type from the "Reward" field (assuming it's a string, e.g., "15% off Coupon (PC & PS)")
                     const reward = data.Reward;
 
@@ -569,7 +569,7 @@ function updateCustomerIndexes() {
                     discount: parseFloat(document.getElementById("discount").value) || 0,
                     cash_discount: parseFloat(document.getElementById("cashDiscount").value) || 0,
                     totalPrice: document.getElementsByName('totalPrice')[0].value,
-                    couponCode: document.getElementById("couponCode").value.trim(), // Add coupon code if applicable
+                    coupon: document.getElementById("couponCode").value.trim(), // Add coupon code if applicable
                     createdAt: istTime.toISOString() // Add createdAt field with IST time
                 };
 

@@ -1,4 +1,5 @@
 const Session = require('../models/Session');
+const Code = require('../models/Code');
 
 // Create a new session
 exports.createSession = async (sessionData) => {
@@ -29,6 +30,15 @@ exports.createSession = async (sessionData) => {
         // Set the session's start and end times
         session.sessionStartTime = startTime;
         session.sessionEndTime = endTime;
+
+        // If a coupon is provided, mark its validity as 'Used'
+        if (session.coupon) {
+            await Code.findOneAndUpdate(
+                { Code: session.coupon },
+                { Validity: 'Used' },
+                { new: true }
+            );
+        }
 
         // Save the session to the database
         await session.save();
