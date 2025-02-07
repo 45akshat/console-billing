@@ -156,12 +156,6 @@
         // Rewards Logic
         const rewards = {
             "Pay for 4 get 5 hours": (sessionDuration, totalPrice) => {
-                if (sessionDuration >= 4) {
-                    // Apply logic for 4 hours pay 5 hours
-                    totalPrice = totalPrice * 4 / 5; // Book 2 hours, pay for 3 hours
-                    
-                    return totalPrice;
-                }
                 return totalPrice;
             },
             "15% off": (sessionDuration, totalPrice) => {
@@ -173,47 +167,27 @@
                 return totalPrice * 0.85; // Apply 15% discount
             },
             "15 Mins": (sessionDuration, totalPrice) => { //--- SELF-----
-                if (sessionDuration >= 1) {
-                    const freeMinutes = Math.floor(sessionDuration) * 15; // 15 mins free per hour
-                }
+
                 return totalPrice;
             },
             "15 min free gaming": (sessionDuration, totalPrice) => { //--- SELF-----
-                if (sessionDuration >= 1) {
-                    const freeMinutes = Math.floor(sessionDuration) * 15; // 15 mins free per hour
-                }
                 return totalPrice;
             },
             
             "30 Mins": (sessionDuration, totalPrice) => { //--- SELF-----
-                if (sessionDuration >= 1) {
-                    const freeMinutes = Math.floor(sessionDuration) * 30; // 30 mins free per hour
-                    totalPrice -= (freeMinutes / 60) * totalPrice; // Subtract the price equivalent of free time
-                }
+
                 return totalPrice;
             },
             "1 Hour": (sessionDuration, totalPrice) => { 
-                if (sessionDuration >= 1) {
-                    totalPrice -= totalPrice / sessionDuration; // Subtract the price equivalent of one hour
-                }
                 return totalPrice;
             },
             "1 hour free gaming":(sessionDuration, totalPrice) => { 
-                if (sessionDuration >= 1) {
-                    totalPrice -= totalPrice / sessionDuration; // Subtract the price equivalent of one hour
-                }
                 return totalPrice;
             },
             "Pay for 2 get 3 hours": (sessionDuration, totalPrice) => {  
-                if (sessionDuration === 2) {
-                    totalPrice = totalPrice * 2 / 3; // Book 2 hours, pay for 3 hours
-                }
                 return totalPrice;
             },
             "Buy 4 Get 1": (sessionDuration, totalPrice, platform) => {
-                if (platform === 'PC') {
-                    totalPrice = totalPrice * 4 / 5; // Book for 5 players but pay for 4 (only applicable for PC)
-                }
                 return totalPrice;
             },
             "1 Day": (sessionDuration, totalPrice, platform) => {
@@ -743,7 +717,7 @@ totalPrice = Math.round(totalPrice); // Round off to the nearest integer
 document.getElementsByName('totalPrice')[0].value = totalPrice
 
 
-if (isMember && wallet < totalPrice) {
+                        if (isMember && wallet < totalPrice) {
                             disableEnableButton("true")
                         } else {
                             disableEnableButton("false")
