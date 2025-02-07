@@ -247,6 +247,9 @@
                 alert('An error occurred while checking the coupon. Please try again.'); // Show generic error message
             }
 
+            totalPrice = Math.round(totalPrice); // Round off to the nearest integer
+
+
             // Return the updated total price
             return totalPrice;
         }
