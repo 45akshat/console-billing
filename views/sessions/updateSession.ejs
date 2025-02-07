@@ -115,6 +115,17 @@
         </form>
     </div>
 
+    <!-- Custom Popup for Coupon Notification -->
+    <% if (session.coupon) { %>
+    <div id="couponPopup" class="popup">
+        <div class="popup-content">
+            <p>To edit you will have to revoke the coupon</p>
+            <button id="continueButton">Continue</button>
+            <button id="goBackButton">Go Back</button>
+        </div>
+    </div>
+    <% } %>
+
     
     <script>
         // Variable to store membership status
@@ -477,7 +488,12 @@ function updateCustomerIndexes() {
                 let customers = [];
                 let longestSessionDuration = 0; // Initialize the variable for longest session duration
 
-                
+                if(isMember == false){
+                    if( parseInt(document.getElementById("totalPrice").value) != (parseInt(document.getElementById('cash').value) + parseInt(document.getElementById('online').value))){
+                    alert('Cash + Online is not matching total')
+                    throw new Error('Invalid input: Expected a string');
+                } 
+
                 for (let i = 0; i < customerCount; i++) {
                     const name = formData.get(`customers[${i}][name]`);
                     const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
@@ -671,7 +687,48 @@ function updateCustomerIndexes() {
 
         })
 
+        // Show popup if coupon is applied
+        <% if (session.coupon) { %>
+        const popup = document.getElementById('couponPopup');
+        popup.style.display = 'block';
+
+        document.getElementById('continueButton').addEventListener('click', () => {
+            popup.style.display = 'none';
+        });
+
+        document.getElementById('goBackButton').addEventListener('click', () => {
+            window.history.back();
+        });
+        <% } %>
 
     </script>
+
+    <style>
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .popup-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .popup-content button {
+            margin: 10px;
+        }
+    </style>
 </body>
 </html>
