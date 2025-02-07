@@ -397,7 +397,8 @@ function updateCustomerIndexes() {
         document.addEventListener('DOMContentLoaded', async () => {
 
 
-            async function checkCoupon() {
+                     
+        async function checkCoupon() {
                 // Get the coupon code and apply the reward if any
                 const formData = new FormData(sessionForm);
 
@@ -406,7 +407,6 @@ function updateCustomerIndexes() {
                 const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
                 const wallet = document.getElementById(`primaryWallet`).value;
                 let totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
-                let cashDiscount = parseFloat(document.getElementById("cashDiscount").value) || 0; // Fetch cash discount
 
 
                 let longestSessionDuration = 0; // Initialize the variable for longest session duration
@@ -435,7 +435,7 @@ function updateCustomerIndexes() {
                 console.log(data);
 
                 // Check if the coupon is valid
-                if (response.ok && data && data.Code === couponCode) {
+                if (response.ok && data && data.Code === couponCode && data.Validity != 'Used') {
                     // Extract reward type from the "Reward" field (assuming it's a string, e.g., "15% off Coupon (PC & PS)")
                     const reward = data.Reward;
 
@@ -446,7 +446,6 @@ function updateCustomerIndexes() {
                     // Update the total price input field
                     document.getElementById("totalPrice").value = discountedCPrice;
 
-
                     alert(`Coupon applied! Total price after applying reward: ₹${discountedCPrice}`);
                 } else {
                     alert(data.message || 'Invalid coupon code or coupon expired.'); // Show error message if coupon is invalid or expired
@@ -455,9 +454,12 @@ function updateCustomerIndexes() {
                 console.error('Error verifying coupon:', error);
                 alert('An error occurred while checking the coupon. Please try again.'); // Show generic error message
             }
+
             // Return the updated total price
             return totalPrice;
         }
+
+     
 
 
             document.getElementById('check-coupon-btn').addEventListener('click', ()=>{
