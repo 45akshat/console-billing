@@ -478,6 +478,15 @@ function updateCustomerIndexes() {
                 let longestSessionDuration = 0; // Initialize the variable for longest session duration
 
                 
+                if(isMember == false){
+                    if( parseInt(document.getElementById("totalPrice").value) != (parseInt(document.getElementById('cash').value) + parseInt(document.getElementById('online').value))){
+                    alert('Cash + Online is not matching total')
+
+                    throw new Error('Invalid input: Expected a string');
+                } 
+                }      
+
+
                 for (let i = 0; i < customerCount; i++) {
                     const name = formData.get(`customers[${i}][name]`);
                     const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
@@ -489,6 +498,8 @@ function updateCustomerIndexes() {
                     }
 
                 }
+
+                
 
 
 
@@ -513,6 +524,7 @@ function updateCustomerIndexes() {
                     discount: parseFloat(document.getElementById("discount").value) || 0,
                     cash_discount: cashDiscount,
                     totalPrice,
+                    coupon: document.getElementById("couponCode").value.trim(), // Add coupon code if applicable
                 };
 
                 // Get the old session data
@@ -536,6 +548,7 @@ function updateCustomerIndexes() {
                     discount: <%= session.discount %>,
                     cash_discount: <%= session.cash_discount %>,
                     totalPrice: <%= session.totalPrice %>,
+                    coupon: document.getElementById("couponCode").value.trim(), // Add coupon code if applicable
                 };
 
                 try {
@@ -671,7 +684,46 @@ function updateCustomerIndexes() {
 
         })
 
+        document.addEventListener('DOMContentLoaded', () => {
+            const couponCode = "<%= session.coupon %>";
+            if (couponCode) {
+                showRevokeCouponPopup();
+            }
+        });
 
+        function showRevokeCouponPopup() {
+            const popup = document.createElement('div');
+            popup.id = 'revokeCouponPopup';
+            popup.style.position = 'fixed';
+            popup.style.top = '50%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.backgroundColor = '#fff';
+            popup.style.padding = '20px';
+            popup.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
+            popup.style.zIndex = '1000';
+
+            const message = document.createElement('p');
+            message.textContent = 'Revoke Coupon?';
+
+            const continueButton = document.createElement('button');
+            continueButton.textContent = 'Continue';
+            continueButton.onclick = () => {
+                document.body.removeChild(popup);
+            };
+
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = 'Cancel';
+            cancelButton.onclick = () => {
+                document.body.removeChild(popup);
+            };
+
+            popup.appendChild(message);
+            popup.appendChild(continueButton);
+            popup.appendChild(cancelButton);
+
+            document.body.appendChild(popup);
+        }
     </script>
 </body>
 </html>
