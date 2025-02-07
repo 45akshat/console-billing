@@ -457,12 +457,10 @@ function updateCustomerIndexes() {
 
 
             
-        document.addEventListener('DOMContentLoaded', () => {
             const couponCode = "<%= session.coupon %>";
             if (couponCode) {
                 showRevokeCouponPopup();
             }
-        });
 
         function showRevokeCouponPopup() {
             const popup = document.createElement('div');
