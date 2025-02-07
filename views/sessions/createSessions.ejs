@@ -727,11 +727,6 @@ function updateCustomerIndexes() {
                        
 
 
-                        if (isMember && wallet < totalPrice) {
-                            disableEnableButton("true")
-                        } else {
-                            disableEnableButton("false")
-                        }
                     }
 
                     console.log(discount, totalPrice, "discount")
@@ -746,6 +741,13 @@ if (cashDiscount > 0) {
 
 totalPrice = Math.round(totalPrice); // Round off to the nearest integer
 document.getElementsByName('totalPrice')[0].value = totalPrice
+
+
+if (isMember && wallet < totalPrice) {
+                            disableEnableButton("true")
+                        } else {
+                            disableEnableButton("false")
+                        }
 
 
 console.log(discount, totalPrice, "discount")
