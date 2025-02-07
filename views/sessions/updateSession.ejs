@@ -115,18 +115,15 @@
         </form>
     </div>
 
-
-<!-- Custom Popup for Coupon Notification -->
-<% if (session.coupon) { %>
+    <% if (session.coupon) { %>
     <div id="couponPopup" class="popup">
         <div class="popup-content">
-            <p>To edit you will have to revoke the coupon</p>
+            <p>To edit you will have to revoke the coupon: <%= session.coupon %></p>
             <button id="continueButton">Continue</button>
             <button id="goBackButton">Go Back</button>
         </div>
     </div>
-<% } %>
-
+    <% } %>
 
     
     <script>
@@ -686,22 +683,24 @@ function updateCustomerIndexes() {
                 }
             }
 
+            <% if (session.coupon) { %>
+            const popup = document.getElementById('couponPopup');
+            const continueButton = document.getElementById('continueButton');
+            const goBackButton = document.getElementById('goBackButton');
+
+            popup.style.display = 'block';
+
+            continueButton.addEventListener('click', () => {
+                popup.style.display = 'none';
+            });
+
+            goBackButton.addEventListener('click', () => {
+                window.history.back();
+            });
+            <% } %>
 
         })
 
-        // Show popup if coupon is applied
-        <% if (session.coupon) { %>
-        const popup = document.getElementById('couponPopup');
-        popup.style.display = 'block';
-
-        document.getElementById('continueButton').addEventListener('click', () => {
-            popup.style.display = 'none';
-        });
-
-        document.getElementById('goBackButton').addEventListener('click', () => {
-            window.history.back();
-        });
-        <% } %>
 
     </script>
 
@@ -724,7 +723,7 @@ function updateCustomerIndexes() {
             transform: translate(-50%, -50%);
             background-color: white;
             padding: 20px;
-            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
             text-align: center;
         }
 
