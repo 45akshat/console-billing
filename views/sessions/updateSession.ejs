@@ -434,9 +434,13 @@ function updateCustomerIndexes() {
                 // Debugging purpose: log the response data to the console
                 console.log(data);
 
-                // Check if the coupon is valid
-                if (response.ok && data && data.Code === couponCode && data.Validity != 'Used') {
-                    // Extract reward type from the "Reward" field (assuming it's a string, e.g., "15% off Coupon (PC & PS)")
+                if (
+                        response.ok &&
+                        data &&
+                        data.Code === couponCode && (data.Validity !== 'Used' || "<%= session.coupon %>" === couponCode)
+                    ) {
+
+                // Extract reward type from the "Reward" field (assuming it's a string, e.g., "15% off Coupon (PC & PS)")
                     const reward = data.Reward;
 
                     // Apply the reward logic based on the coupon
