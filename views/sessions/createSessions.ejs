@@ -455,6 +455,7 @@ function updateCustomerIndexes() {
 
                     // Apply the reward logic based on the coupon
                     let discountedCPrice = applyReward(reward, longestSessionDuration, platform, totalPrice);
+                    discountedCPrice = Math.round(discountedCPrice); // Round off to the nearest integer
 
                     // Update the total price input field
                     document.getElementById("totalPrice").value = discountedCPrice;
@@ -467,7 +468,6 @@ function updateCustomerIndexes() {
                 console.error('Error verifying coupon:', error);
                 alert('An error occurred while checking the coupon. Please try again.'); // Show generic error message
             }
-            totalPrice = Math.round(totalPrice); // Round off to the nearest integer
 
             // Return the updated total price
             return totalPrice;
