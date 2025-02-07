@@ -477,12 +477,7 @@ function updateCustomerIndexes() {
                 let customers = [];
                 let longestSessionDuration = 0; // Initialize the variable for longest session duration
 
-                if(isMember == false){
-                    if( parseInt(document.getElementById("totalPrice").value) != (parseInt(document.getElementById('cash').value) + parseInt(document.getElementById('online').value))){
-                    alert('Cash + Online is not matching total')
-                    throw new Error('Invalid input: Expected a string');
-                } 
-
+                
                 for (let i = 0; i < customerCount; i++) {
                     const name = formData.get(`customers[${i}][name]`);
                     const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
