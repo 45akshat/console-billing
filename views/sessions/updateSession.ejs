@@ -104,7 +104,7 @@
             <label for="couponCode">Coupon Code</label>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <input type="text" id="couponCode" name="couponCode" value="<%= session.coupon %>" placeholder="Enter coupon code">
-                <button type="button" onclick="checkCoupon()">Check Coupon</button>
+                <button type="button" id="check-coupon-btn">Check Coupon</button>
             </div>
 
             <label for="totalPrice">Total Price</label>
@@ -191,67 +191,6 @@
                 discountedTotal = rewardFunction(sessionDuration, totalPrice, platform);
                 console.log(discountedTotal)
                 return discountedTotal
-        }
-
-        async function checkCoupon() {
-                // Get the coupon code and apply the reward if any
-                const formData = new FormData(sessionForm);
-
-                const couponCode = document.getElementById('couponCode').value.trim();
-                const platform = document.getElementById("platformInput").value;
-                const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
-                const wallet = document.getElementById(`primaryWallet`).value;
-                let totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
-                let cashDiscount = parseFloat(document.getElementById("cashDiscount").value) || 0; // Fetch cash discount
-
-
-                let longestSessionDuration = 0; // Initialize the variable for longest session duration
-
-                for (let i = 0; i < customerCount; i++) {
-                    const name = formData.get(`customers[${i}][name]`);
-                    const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
-
-                    // Update longest session duration
-                    if (sessionDuration > longestSessionDuration) {
-                        longestSessionDuration = sessionDuration;
-                    }
-
-                }
-
-
-            console.log(couponCode)
-            try {
-                // Make a GET request to fetch coupon data from the backend API using the entered coupon code
-                const response = await fetch(`/codes/codes/${encodeURIComponent(couponCode)}`);
-
-                // Check if the response is okay (status code 200-299)
-                const data = await response.json(); // Parse JSON response
-
-                // Debugging purpose: log the response data to the console
-                console.log(data);
-
-                // Check if the coupon is valid
-                if (response.ok && data && data.Code === couponCode) {
-                    // Extract reward type from the "Reward" field (assuming it's a string, e.g., "15% off Coupon (PC & PS)")
-                    const reward = data.Reward;
-
-                    // Apply the reward logic based on the coupon
-                    let discountedCPrice = applyReward(reward, longestSessionDuration, platform, totalPrice);
-
-                    alert(`Coupon applied! Total price after applying reward: ₹${discountedCPrice}`);
-                } else {
-                    alert(data.message || 'Invalid coupon code or coupon expired.'); // Show error message if coupon is invalid or expired
-                }
-            } catch (error) {
-                console.error('Error verifying coupon:', error);
-                alert('An error occurred while checking the coupon. Please try again.'); // Show generic error message
-            }
-
-            totalPrice = Math.round(totalPrice); // Round off to the nearest integer
-
-
-            // Return the updated total price
-            return totalPrice;
         }
 
         // Function to fetch user data based on the code (UserID)
@@ -458,6 +397,73 @@ function updateCustomerIndexes() {
         document.addEventListener('DOMContentLoaded', async () => {
 
 
+            async function checkCoupon() {
+                // Get the coupon code and apply the reward if any
+                const formData = new FormData(sessionForm);
+
+                const couponCode = document.getElementById('couponCode').value.trim();
+                const platform = document.getElementById("platformInput").value;
+                const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
+                const wallet = document.getElementById(`primaryWallet`).value;
+                let totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
+                let cashDiscount = parseFloat(document.getElementById("cashDiscount").value) || 0; // Fetch cash discount
+
+
+                let longestSessionDuration = 0; // Initialize the variable for longest session duration
+
+                for (let i = 0; i < customerCount; i++) {
+                    const name = formData.get(`customers[${i}][name]`);
+                    const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
+
+                    // Update longest session duration
+                    if (sessionDuration > longestSessionDuration) {
+                        longestSessionDuration = sessionDuration;
+                    }
+
+                }
+
+
+            console.log(couponCode)
+            try {
+                // Make a GET request to fetch coupon data from the backend API using the entered coupon code
+                const response = await fetch(`/codes/codes/${encodeURIComponent(couponCode)}`);
+
+                // Check if the response is okay (status code 200-299)
+                const data = await response.json(); // Parse JSON response
+
+                // Debugging purpose: log the response data to the console
+                console.log(data);
+
+                // Check if the coupon is valid
+                if (response.ok && data && data.Code === couponCode) {
+                    // Extract reward type from the "Reward" field (assuming it's a string, e.g., "15% off Coupon (PC & PS)")
+                    const reward = data.Reward;
+
+                    // Apply the reward logic based on the coupon
+                    let discountedCPrice = applyReward(reward, longestSessionDuration, platform, totalPrice);
+                    discountedCPrice = Math.round(discountedCPrice); // Round off to the nearest integer
+
+                    // Update the total price input field
+                    document.getElementById("totalPrice").value = discountedCPrice;
+
+
+                    alert(`Coupon applied! Total price after applying reward: ₹${discountedCPrice}`);
+                } else {
+                    alert(data.message || 'Invalid coupon code or coupon expired.'); // Show error message if coupon is invalid or expired
+                }
+            } catch (error) {
+                console.error('Error verifying coupon:', error);
+                alert('An error occurred while checking the coupon. Please try again.'); // Show generic error message
+            }
+            // Return the updated total price
+            return totalPrice;
+        }
+
+
+            document.getElementById('check-coupon-btn').addEventListener('click', ()=>{
+            calculateTotalPrice();
+            checkCoupon();
+        });
 
             
             const couponCode = "<%= session.coupon %>";
