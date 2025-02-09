@@ -476,6 +476,12 @@ function updateCustomerIndexes() {
         document.getElementById('check-coupon-btn').addEventListener('click', ()=>{
             calculateTotalPrice();
             checkCoupon();
+            
+            if (isMember && wallet < totalPrice) {
+                            disableEnableButton("true")
+                        } else {
+                            disableEnableButton("false")
+                        }
         });
 
             const locationId = '<%= locationId %>'; // Get locationId from the server-side rendering
