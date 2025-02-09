@@ -273,3 +273,32 @@ exports.handleQrScan = (req, res) => {
         res.status(400).json({ error: 'Invalid token' });
     }
 };
+
+// Delete a session
+exports.deleteSession = async (req, res) => {
+    try {
+        const { sessionId } = req.params;
+        const user = req.user;
+
+        if (user.Location_Id !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Unauthorized to delete session',
+            });
+        }
+
+        await sessionService.deleteSession(sessionId);
+
+        res.status(200).json({
+            success: true,
+            message: 'Session deleted successfully',
+        });
+    } catch (error) {
+        console.error('Error deleting session:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting session',
+            error: error.message,
+        });
+    }
+};

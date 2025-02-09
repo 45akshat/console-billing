@@ -190,3 +190,31 @@ exports.getAllLocations = async () => {
     }
 };
 
+// Delete a session by ID
+exports.deleteSession = async (sessionId) => {
+    try {
+        const session = await Session.findByIdAndDelete(sessionId);
+        if (!session) {
+            throw new Error('Session not found');
+        }
+
+        // If the session has a coupon, update its validity to "7 days"
+        if (session.coupon) {
+            const coupon = await Code.findOneAndUpdate(
+                { Code: session.coupon },
+                { Validity: '7 days' },
+                { new: true }
+            );
+
+            if (!coupon) {
+                console.log('Coupon not found');
+            }
+        }
+
+        return session;
+    } catch (error) {
+        console.error('Error deleting session:', error);
+        throw new Error('Error deleting session');
+    }
+};
+

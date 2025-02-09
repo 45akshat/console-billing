@@ -28,6 +28,9 @@ router.get('/all', verifyJwt, sessionController.renderAllSessionsPage);
 // Route to update session details (like payment, discount, price)
 router.put('/:sessionId/update', sessionController.updateSession); 
 
+// Route to delete a session
+router.delete('/delete/:sessionId', verifyJwt, sessionController.deleteSession);
+
 // Route to fetch a session by ID
 router.get('/:sessionId', sessionController.getSessionById); 
 
