@@ -476,14 +476,15 @@ function updateCustomerIndexes() {
         document.getElementById('check-coupon-btn').addEventListener('click', ()=>{
             calculateTotalPrice();
             checkCoupon();
+            const wallet = parseFloat(document.getElementById("primaryWallet").value) || 0;
+            const totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
+
             
-            if (!isMember && wallet >= document.getElementById("totalPrice").value) {
-    disableEnableButton("false"); // Enable button
-} else {
-    disableEnableButton("true"); // Disable button
-}
-
-
+            if (isMember && wallet >= totalPrice) {
+                            disableEnableButton("false")
+                        } else {
+                            disableEnableButton("true")
+                        }
         });
 
             const locationId = '<%= locationId %>'; // Get locationId from the server-side rendering
@@ -660,13 +661,11 @@ function updateCustomerIndexes() {
                     console.log("Customers:", customers);
                     console.log("Total Price:", totalPrice);
 
-            
-                    if (!isMember && wallet >= document.getElementById("totalPrice").value) {
-    disableEnableButton("false"); // Enable button
-} else {
-    disableEnableButton("true"); // Disable button
-}
-
+                    if (isMember && wallet < totalPrice) {
+                        disableEnableButton("true")
+                    } else {
+                        disableEnableButton("false")
+                    }
                     // Set total price in the form
                     document.getElementById("totalPrice").value = totalPrice;
                 } else if (platform === 'PS') {
@@ -735,12 +734,11 @@ totalPrice = Math.round(totalPrice); // Round off to the nearest integer
 document.getElementsByName('totalPrice')[0].value = totalPrice
 
 
-            
-if (!isMember && wallet >= document.getElementById("totalPrice").value) {
-    disableEnableButton("false"); // Enable button
-} else {
-    disableEnableButton("true"); // Disable button
-}
+                        if (isMember && wallet < totalPrice) {
+                            disableEnableButton("true")
+                        } else {
+                            disableEnableButton("false")
+                        }
 
 
 console.log(discount, totalPrice, "discount")
