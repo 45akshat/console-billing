@@ -477,11 +477,13 @@ function updateCustomerIndexes() {
             calculateTotalPrice();
             checkCoupon();
             
-            if (wallet <= document.getElementById("totalPrice").value) {
-                            disableEnableButton("true")
-                        } else {
-                            disableEnableButton("false")
-                        }
+            if (!isMember && wallet >= document.getElementById("totalPrice").value) {
+    disableEnableButton("false"); // Enable button
+} else {
+    disableEnableButton("true"); // Disable button
+}
+
+
         });
 
             const locationId = '<%= locationId %>'; // Get locationId from the server-side rendering
@@ -658,11 +660,13 @@ function updateCustomerIndexes() {
                     console.log("Customers:", customers);
                     console.log("Total Price:", totalPrice);
 
-                    if (isMember && wallet < totalPrice) {
-                        disableEnableButton("true")
-                    } else {
-                        disableEnableButton("false")
-                    }
+            
+                    if (!isMember && wallet >= document.getElementById("totalPrice").value) {
+    disableEnableButton("false"); // Enable button
+} else {
+    disableEnableButton("true"); // Disable button
+}
+
                     // Set total price in the form
                     document.getElementById("totalPrice").value = totalPrice;
                 } else if (platform === 'PS') {
@@ -731,11 +735,12 @@ totalPrice = Math.round(totalPrice); // Round off to the nearest integer
 document.getElementsByName('totalPrice')[0].value = totalPrice
 
 
-                        if (isMember && wallet < totalPrice) {
-                            disableEnableButton("true")
-                        } else {
-                            disableEnableButton("false")
-                        }
+            
+if (!isMember && wallet >= document.getElementById("totalPrice").value) {
+    disableEnableButton("false"); // Enable button
+} else {
+    disableEnableButton("true"); // Disable button
+}
 
 
 console.log(discount, totalPrice, "discount")

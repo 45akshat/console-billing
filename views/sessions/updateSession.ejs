@@ -470,11 +470,12 @@ function updateCustomerIndexes() {
             calculateTotalPrice();
             checkCoupon();
             
-            if (isMember && wallet < totalPrice) {
-                            disableEnableButton("true")
-                        } else {
-                            disableEnableButton("false")
-                        }
+            
+            if (!isMember && wallet >= document.getElementById("totalPrice").value) {
+    disableEnableButton("false"); // Enable button
+} else {
+    disableEnableButton("true"); // Disable button
+}
         });
 
             
