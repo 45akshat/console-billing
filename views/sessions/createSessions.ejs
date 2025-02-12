@@ -460,6 +460,14 @@ function updateCustomerIndexes() {
                     // Update the total price input field
                     document.getElementById("totalPrice").value = discountedCPrice;
 
+                    if (isMember && document.getElementById(`primaryWallet`).value >= document.getElementById("totalPrice").value) {
+                            disableEnableButton("false")
+                        }else if(!isMember){
+                            disableEnableButton("false") 
+                        }else {
+                            disableEnableButton("true")
+                        }
+
                     alert(`Coupon applied! Total price after applying reward: ₹${discountedCPrice}`);
                 } else {
                     alert(data.message || 'Invalid coupon code or coupon expired.'); // Show error message if coupon is invalid or expired
