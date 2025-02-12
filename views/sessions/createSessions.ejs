@@ -663,11 +663,15 @@ function updateCustomerIndexes() {
                     console.log("Customers:", customers);
                     console.log("Total Price:", totalPrice);
 
-                    if (isMember && wallet < totalPrice) {
-                        disableEnableButton("true")
-                    } else {
-                        disableEnableButton("false")
-                    }
+
+            
+            if (isMember && wallet >= totalPrice) {
+                            disableEnableButton("false")
+                        }else if(!isMember){
+                            disableEnableButton("false") 
+                        }else {
+                            disableEnableButton("true")
+                        }
                     // Set total price in the form
                     document.getElementById("totalPrice").value = totalPrice;
                 } else if (platform === 'PS') {
@@ -736,10 +740,14 @@ totalPrice = Math.round(totalPrice); // Round off to the nearest integer
 document.getElementsByName('totalPrice')[0].value = totalPrice
 
 
-                        if (isMember && wallet < totalPrice) {
-                            disableEnableButton("true")
-                        } else {
+
+            
+            if (isMember && wallet >= totalPrice) {
                             disableEnableButton("false")
+                        }else if(!isMember){
+                            disableEnableButton("false") 
+                        }else {
+                            disableEnableButton("true")
                         }
 
 
