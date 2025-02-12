@@ -480,7 +480,7 @@ function updateCustomerIndexes() {
             const totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
 
             
-            if (isMember && wallet >= totalPrice) {
+            if (isMember && document.getElementById(`primaryWallet`).value >= document.getElementById("totalPrice").value) {
                             disableEnableButton("false")
                         }else if(!isMember){
                             disableEnableButton("false") 
@@ -665,15 +665,16 @@ function updateCustomerIndexes() {
 
 
             
-            if (isMember && wallet >= totalPrice) {
+
+                    // Set total price in the form
+                    document.getElementById("totalPrice").value = totalPrice;
+                    if (isMember && document.getElementById(`primaryWallet`).value >= document.getElementById("totalPrice").value) {
                             disableEnableButton("false")
                         }else if(!isMember){
                             disableEnableButton("false") 
                         }else {
                             disableEnableButton("true")
                         }
-                    // Set total price in the form
-                    document.getElementById("totalPrice").value = totalPrice;
                 } else if (platform === 'PS') {
 
 
@@ -742,7 +743,7 @@ document.getElementsByName('totalPrice')[0].value = totalPrice
 
 
             
-            if (isMember && wallet >= totalPrice) {
+if (isMember && document.getElementById(`primaryWallet`).value >= document.getElementById("totalPrice").value) {
                             disableEnableButton("false")
                         }else if(!isMember){
                             disableEnableButton("false") 
