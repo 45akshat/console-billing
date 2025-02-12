@@ -480,7 +480,7 @@ function updateCustomerIndexes() {
             const totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
 
             
-            if (isMember && wallet >= totalPrice) {
+            if (!isMember && wallet >= totalPrice) {
                             disableEnableButton("false")
                         } else {
                             disableEnableButton("true")
