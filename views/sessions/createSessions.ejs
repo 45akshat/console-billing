@@ -460,6 +460,7 @@ function updateCustomerIndexes() {
                     // Update the total price input field
                     document.getElementById("totalPrice").value = discountedCPrice;
 
+                    
                     if (isMember && document.getElementById(`primaryWallet`).value >= document.getElementById("totalPrice").value) {
                             disableEnableButton("false")
                         }else if(!isMember){
@@ -484,16 +485,11 @@ function updateCustomerIndexes() {
         document.getElementById('check-coupon-btn').addEventListener('click', ()=>{
             calculateTotalPrice();
             checkCoupon();
-            const wallet = parseFloat(document.getElementById("primaryWallet").value) || 0;
-            const totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
-
             
-            if (isMember && document.getElementById(`primaryWallet`).value >= document.getElementById("totalPrice").value) {
-                            disableEnableButton("false")
-                        }else if(!isMember){
-                            disableEnableButton("false") 
-                        }else {
+            if (isMember && wallet < totalPrice) {
                             disableEnableButton("true")
+                        } else {
+                            disableEnableButton("false")
                         }
         });
 
@@ -671,18 +667,13 @@ function updateCustomerIndexes() {
                     console.log("Customers:", customers);
                     console.log("Total Price:", totalPrice);
 
-
-            
-
+                    if (isMember && wallet < totalPrice) {
+                        disableEnableButton("true")
+                    } else {
+                        disableEnableButton("false")
+                    }
                     // Set total price in the form
                     document.getElementById("totalPrice").value = totalPrice;
-                    if (isMember && document.getElementById(`primaryWallet`).value >= document.getElementById("totalPrice").value) {
-                            disableEnableButton("false")
-                        }else if(!isMember){
-                            disableEnableButton("false") 
-                        }else {
-                            disableEnableButton("true")
-                        }
                 } else if (platform === 'PS') {
 
 
@@ -749,14 +740,10 @@ totalPrice = Math.round(totalPrice); // Round off to the nearest integer
 document.getElementsByName('totalPrice')[0].value = totalPrice
 
 
-
-            
-if (isMember && document.getElementById(`primaryWallet`).value >= document.getElementById("totalPrice").value) {
-                            disableEnableButton("false")
-                        }else if(!isMember){
-                            disableEnableButton("false") 
-                        }else {
+                        if (isMember && wallet < totalPrice) {
                             disableEnableButton("true")
+                        } else {
+                            disableEnableButton("false")
                         }
 
 
