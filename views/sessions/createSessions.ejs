@@ -477,7 +477,7 @@ function updateCustomerIndexes() {
             calculateTotalPrice();
             checkCoupon();
             
-            if (isMember && wallet < totalPrice) {
+            if (isMember && wallet < document.getElementById("totalPrice").value) {
                             disableEnableButton("true")
                         } else {
                             disableEnableButton("false")
