@@ -230,9 +230,11 @@ exports.renderAllSessionsPage = async (req, res) => {
         const startDate = req.query.startDate || istDate.toISOString().split('T')[0];
         const endDate = req.query.endDate || istDate.toISOString().split('T')[0];
         const location = req.query.location || user.Location_Id;
+        const isMember = req.query.isMember;
+        const platform = req.query.platform;
 
         // Get sessions for the specified date range and location
-        const sessions = await sessionService.getSessionsForDateRange(startDate, endDate, location);
+        const sessions = await sessionService.getSessionsForDateRange(startDate, endDate, location, isMember, platform);
 
         if (!sessions || sessions.length === 0) {
             return res.render('sessions/allSessions', {

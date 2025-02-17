@@ -259,6 +259,18 @@ new Chart(timeCtx, {
                         <% } %>
                     </select>
                 <% } %>
+                <label for="isMember">Is Member: </label>
+                <select id="isMember" name="isMember">
+                    <option value="">All</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+                <label for="platform">Platform: </label>
+                <select id="platform" name="platform">
+                    <option value="">All</option>
+                    <option value="PC">PC</option>
+                    <option value="PS">PS</option>
+                </select>
                 <button type="submit">Filter</button>
             </form>
         </section>

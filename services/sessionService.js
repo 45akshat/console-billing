@@ -140,7 +140,7 @@ exports.getSessionsForDate = async (date, Location_Id) => {
 };
 
 // Get sessions for a specific date range and location
-exports.getSessionsForDateRange = async (startDate, endDate, Location_Id) => {
+exports.getSessionsForDateRange = async (startDate, endDate, Location_Id, isMember, platform) => {
     try {
         const start = new Date(startDate);
         const end = new Date(endDate);
@@ -167,6 +167,16 @@ exports.getSessionsForDateRange = async (startDate, endDate, Location_Id) => {
             query.Location_Id = Location_Id.includes('-admin') 
                 ? Location_Id.replace('-admin', '') 
                 : Location_Id;
+        }
+
+        // Add isMember filter if provided
+        if (isMember !== undefined && isMember !== '') {
+            query.isMember = isMember === 'true';
+        }
+
+        // Add platform filter if provided
+        if (platform !== undefined && platform !== '') {
+            query.platform = platform;
         }
 
         // Query the database for sessions
