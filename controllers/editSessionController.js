@@ -35,7 +35,7 @@ const convertToIST = (date) => {
 exports.renderEditLogsPage = async (req, res) => {
     try {
         // Check if the user's location ID is 'admin'
-        if (req.user.locationId !== 'admin') {
+        if (req.user.Location_Id !== 'admin') {
             return res.status(403).send('Access not allowed. Go back.');
         }
 
