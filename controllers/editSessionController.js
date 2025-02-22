@@ -34,6 +34,11 @@ const convertToIST = (date) => {
 // In sessionController.js
 exports.renderEditLogsPage = async (req, res) => {
     try {
+        // Check if the user's location ID is 'admin'
+        if (req.user.locationId !== 'admin') {
+            return res.status(403).send('Access not allowed. Go back.');
+        }
+
         let { startDate, endDate } = req.query;
 
         // Validate and set default dates if necessary
