@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console Gaming</title>
+    <link rel="stylesheet" href="/sessions/all.css">
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
+    </head>
+    <style>
+        /* Remove loading spinner styles */
+        /* .loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.2s ease-out;
+        }
+        .loading-spinner video {
+            width: 50%;
+        }
+        .loading-spinner.hidden {
+            opacity: 0;
+            pointer-events: none;
+        } */
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            startDateInput.value = "<%= startDate %>";
+            endDateInput.value = "<%= endDate %>";
+
+            // Get sessions data for the selected date
+            const sessions = JSON.parse(`<%- JSON.stringify(sessions).replace(/\\/g, '\\\\').replace(/'/g, '\\\'').replace(/"/g, '\\"') %>`); // Safely inject sessions as a JSON string and parse it
+            console.log(sessions)
+            // Calculate total revenue
+            const totalRevenue = sessions.reduce((acc, session) => acc + session.totalPrice, 0);
+
+            // Calculate total sessions
+            const totalSessions = sessions.length;
+
+            // Calculate top session price
+            const topSessionPrice = Math.max(...sessions.map(session => session.totalPrice));
+
+// Calculate most played game
+const gameCount = {};
+sessions.forEach(session => {
+    if (session.game) { // Only increment if game is defined
+        gameCount[session.game] = (gameCount[session.game] || 0) + 1;
+    }
+});
+const mostPlayedGame = Object.keys(gameCount).reduce((a, b) => gameCount[a] > gameCount[b] ? a : b, "");
+
+            // Display the stats
+            document.getElementById('totalRevenue').textContent = "₹ "+ totalRevenue.toFixed(2);
+            document.getElementById('totalSessions').textContent = totalSessions;
+            document.getElementById('topSessionPrice').textContent = topSessionPrice.toFixed(2);
+            document.getElementById('mostPlayedGame').textContent = mostPlayedGame;
+
+            // Remove chart-related code
+
+            // Add JWT token to the form
+            // const jwtToken = localStorage.getItem('jwt');
+            // if (jwtToken) {
+            //     const tokenInput = document.createElement('input');
+            //     tokenInput.type = 'hidden';
+            //     tokenInput.name = 'jwt';
+            //     tokenInput.value = jwtToken;
+            //     document.querySelector('.filter-form').appendChild(tokenInput);
+            // }
+
+        // Calculate table totals
+        const totals = sessions.reduce((acc, session) => {
+            return {
+                cash: acc.cash + (parseFloat(session.payment.cash) || 0),
+                online: acc.online + (parseFloat(session.payment.online) || 0),
+                wallet: acc.wallet + (parseFloat(session.payment.wallet) || 0),
+                discount: acc.discount + (parseFloat(session.discount) || 0),
+                cashDiscount: acc.cashDiscount + (parseFloat(session.cash_discount) || 0), // Add cash discount
+                total: acc.total + (parseFloat(session.totalPrice) || 0)
+            };
+        }, { cash: 0, online: 0, wallet: 0, discount: 0, cashDiscount: 0, total: 0 });
+
+        // Update totals in the table
+        document.getElementById('totalCash').textContent = totals.cash.toFixed(2);
+        document.getElementById('totalOnline').textContent = totals.online.toFixed(2);
+        document.getElementById('totalWallet').textContent = totals.wallet.toFixed(2);
+        document.getElementById('totalDiscount').textContent = totals.discount.toFixed(2);
+        document.getElementById('totalCashDiscount').textContent = totals.cashDiscount.toFixed(2); // Update total cash discount
+        document.getElementById('grandTotal').textContent = totals.total.toFixed(2);
+
+        // Add some styling to the totals row
+        const totalsRow = document.querySelector('.totals-row');
+        if (totalsRow) {
+            totalsRow.style.backgroundColor = '#f5f5f5';
+            totalsRow.style.fontWeight = 'bold';
+        }
+
+        });
+    </script>
+</head>
+<body>
+    <!-- Side Menu -->
+    <aside class="side-menu">
+        <nav>
+            <ul>
+                <li><a href="/" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="/sessions/scan"><i class="fas fa-sign-in-alt"></i> Scan QR</a></li>
+
+<li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <!-- <li><a href="/login/create"><i class="fas fa-user-plus"></i> Create Account</a></li> -->
+                <li><a href="/sessions/create"><i class="fas fa-plus-circle"></i> Create Session</a></li>
+                <li><a href="/sessions/all"><i class="fas fa-list"></i> All Sessions</a></li>
+                <li><a href="/cashlogs/create"><i class="fas fa-money-bill-wave"></i> Create Cash Log</a></li>
+                <li><a href="/cashlogs/all"><i class="fas fa-file-alt"></i> All Cash Logs</a></li>
+            </ul>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main>
+        <h1 class="page-title">Console Gaming</h1>
+
+        <!-- Date Filter Section -->
+        <section class="filter-section">
+            <form method="GET" action="/sessions/all" class="filter-form">
+                <label for="startDate">Start Date: </label>
+                <input type="date" id="startDate" name="startDate" value="<%= startDate %>" required>
+                <label for="endDate">End Date: </label>
+                <input type="date" id="endDate" name="endDate" value="<%= endDate %>" required>
+                <% if (user.Location_Id === 'admin') { %>
+                    <label for="location">Location: </label>
+                    <select id="location" name="location">
+                        <option value="">All Locations</option>
+                        <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
+                            <% locations.forEach(location => { %>
+                                <option value="<%= location %>"><%= location %></option>
+                            <% }) %>
+                        <% } %>
+                    </select>
+                <% } %>
+                <label for="isMember">Is Member: </label>
+                <select id="isMember" name="isMember">
+                    <option value="">All</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+                <label for="platform">Platform: </label>
+                <select id="platform" name="platform">
+                    <option value="">All</option>
+                    <option value="PC">PC</option>
+                    <option value="PS">PS</option>
+                </select>
+                <button type="submit">Filter</button>
+            </form>
+        </section>
+
+        <!-- Metrics Section (Clean Card Layout) -->
+        <section class="metrics-section">
+                <div class="metrics-card total-revenue">
+                    <div class="metric-item">
+                        <strong>Total Revenue</strong><br> <span id="totalRevenue">0.00</span>
+                    </div>
+                </div>
+                <div class="metrics-card">
+                    <div class="metric-item">
+                        <strong>Total Sessions</strong><br> <span id="totalSessions">0</span>
+                    </div>
+                </div>
+                <div class="metrics-card">
+                    <div class="metric-item">
+                        <strong>Top Session Price</strong><br> <span id="topSessionPrice">0.00</span>
+                    </div>
+                </div>
+                <div class="metrics-card">
+                    <div class="metric-item">
+                        <strong>Most Played Game</strong><br> <span id="mostPlayedGame">-</span>
+                    </div>
+                </div>
+        </section>
+        
+
+        <!-- Sessions Data Section (List View) -->
+<!-- Sessions Data Section (Table View) -->
+<section class="sessions-data-section">
+    <h2>Sessions Details</h2>
+    <button onclick="exportToExcel()" class="export-btn">Export to Excel</button>
+    <table class="sessions-table">
+        <thead>
+            <tr>
+                <th>Platform</th>
+                <th>Location</th>
+                <th>Table Number</th>
+                <th>Primary Contact Name</th>
+                <th>Primary Contact Phone</th>
+                <th>Is Member</th>
+                <th>Game</th>
+                <th>Customers</th>
+                <th>Payment (Cash)</th>
+                <th>Payment (Online)</th>
+                <th>Payment (Wallet)</th>
+                <th>Discount</th>
+                <th>Cash Discount</th> <!-- New Cash Discount Column -->
+                <th>Total Price</th>
+                <th>Coupon</th> <!-- New Coupon Column -->
+                <th>Created At</th>
+                <% if ( user.Location_Id.includes('-admin')) { %>
+                    <th>Edit</th>
+                <% } %>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (sessions && sessions.length > 0) { %>
+                <% sessions.forEach(session => { %>
+                    <tr>
+                        <td><%= session.platform %></td>
+                        <td><%= session.Location_Id %></td>
+                        <td><%= session.tableNumber %></td>
+                        <td><%= session.primaryContact.name %></td>
+                        <td><%= session.primaryContact.contact %></td>
+                        <td><%= session.isMember ? 'Yes' : 'No' %></td>
+                        <td><%= session.game %></td>
+                        <td>
+                            <ul>
+                                <% session.customers.forEach(customer => { %>
+                                    <li>
+                                        <%= customer.name %> - <%= customer.sessionDuration %> hrs
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        </td>
+                        <td><%= session.payment.cash %></td>
+                        <td><%= session.payment.online %></td>
+                        <td><%= session.payment.wallet %></td>
+                        <td><%= session.discount %></td>
+                        <td><%= session.cash_discount %></td> <!-- Cash Discount Data -->
+                        <td><%= session.totalPrice %></td>
+                        <td><%= session.coupon ? session.coupon : 'N/A' %></td> <!-- Coupon Data -->
+                        <td><%= new Date(session.createdAt).toLocaleString('en-GB', { timeZone: 'UTC' }) %></td>
+
+    
+                        <!-- Edit Column -->
+                        <% if ( user.Location_Id.includes('-admin')) { %>
+                         
+                        <td>
+                            <a href="/sessions/update/<%= session._id %>" style="text-decoration: none; color: inherit;">
+                                <button style="background: none; border: none; cursor: pointer;" title="Edit Session">
+                                    <!-- Edit SVG Icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2">
+                                        <path d="M17 3l4 4-10 10H7v-4L17 3z"></path>
+                                        <path d="M14 7l7 7"></path>
+                                    </svg>
+                                </button>
+                            </a>
+                        </td>
+        <% } %>
+    
+                    </tr>
+                <% }) %>
+                <!-- Add totals row -->
+                <tr class="totals-row">
+                    <td colspan="8" style="text-align: right; font-weight: bold;">Totals:</td>
+                    <td id="totalCash">0</td>
+                    <td id="totalOnline">0</td>
+                    <td id="totalWallet">0</td>
+                    <td id="totalDiscount">0</td>
+                    <td id="totalCashDiscount">0</td> <!-- Total Cash Discount -->
+                    <td id="grandTotal">0</td>
+                    <td colspan="3"></td>
+                </tr>
+            <% } else { %>
+                <tr>
+                    <td colspan="15">No sessions found for the selected date</td> <!-- Updated colspan -->
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    
+    
+</section>
+
+    </main>
+</body>
+<script>
+    function exportToExcel() {
+        // Get the sessions data from the table
+        const table = document.querySelector('.sessions-table');
+        const worksheet = XLSX.utils.table_to_sheet(table);
+        const workbook = XLSX.utils.book_new();
+    
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sessions');
+    
+        // Create the Excel file and download it
+        XLSX.writeFile(workbook, 'sessions.xlsx');
+    }
+
+    </script>
+    
+</html>

@@ -5,6 +5,7 @@ const sessionRoutes = require('./routes/sessionRoutes'); // Session routes
 const codeRoutes = require('./routes/codeRoutes'); 
 const loginRoutes = require('./routes/loginRoutes'); 
 const cashLogsRoutes = require('./routes/cashLogsRoutes'); 
+const editSessionRoutes = require('./routes/editSessionRoutes'); // Edit session routes
 const { connectDb } = require('./config/db'); // Database connection
 const path = require('path');
 
@@ -66,6 +67,7 @@ app.use('/sessions', sessionRoutes); // Session-related routes (creating and lis
 app.use('/codes', codeRoutes); // Session-related routes (creating and listing sessions)
 app.use('/login', loginRoutes); // Session-related routes (creating and listing sessions)
 app.use('/cashlogs', cashLogsRoutes); // Session-related routes (creating and listing sessions)
+app.use('/edit', editSessionRoutes); // Edit session routes
 
 // Start the server
 app.listen(PORT, async () => {
@@ -73,3 +75,5 @@ app.listen(PORT, async () => {
     await connectDb();
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+module.exports = app;

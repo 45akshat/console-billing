@@ -1,6 +1,7 @@
 const { updateCashInHand, deductWalletAmount, addWalletAmount } = require('../services/loginService');
 const sessionService = require('../services/sessionService');
 const jwt = require('jsonwebtoken');
+const EditSession = require('../models/EditSession');
 
 // Helper function to convert date to IST
 const convertToIST = (date) => {
@@ -65,7 +66,7 @@ exports.updateSession = async (req, res) => {
     try {
         const { sessionId } = req.params; // Extract sessionId from route parameters
         const { sessionData, oldSessionData } = req.body; // Extract new and old session data from request body
-        console.log(oldSessionData.UserID)
+        const user = req.user; // Get the user from the request
 
         // If the session is for a member, handle wallet adjustments
         if (oldSessionData.isMember) {
@@ -88,9 +89,17 @@ exports.updateSession = async (req, res) => {
             await updateCashInHand(oldSessionData.Location_Id, sessionData.payment.cash);
         }
 
-
         // Update session details using the service
         const updatedSession = await sessionService.updateSessionDetails(sessionId, sessionData);
+
+        // Log the edit session data
+        const editSession = new EditSession({
+            sessionId,
+            oldSessionData,
+            newSessionData: sessionData,
+            editedBy: user.Location_Id
+        });
+        await editSession.save();
 
         // Send the response with the updated session
         res.status(200).json({
@@ -258,6 +267,59 @@ exports.renderAllSessionsPage = async (req, res) => {
         res.status(500).send('Error loading sessions');
     }
 };
+
+// In sessionController.js
+exports.renderTranscationLogsPage = async (req, res) => {
+    try {
+        // Access decoded JWT data from req.user
+        const user = req.user;
+
+        // Log or use the user data as needed
+        console.log('Decoded JWT User:', user);
+        if (user.Location_Id == "admin") {
+            console.log("full access + pull out  sessions/all/admin");
+        } else if (user.Location_Id == "branch manager") {
+            console.log("full access   sessions/all/branch manager");
+        } else if (user.Location_Id.search('Franchise') >= 0) {
+            console.log("sessions/all/location name/owner");
+        } else {
+            console.log("sessions/create/location/");
+        }
+
+        // Get the start and end dates from the query parameters
+        const istDate = convertToIST(new Date());
+        const startDate = req.query.startDate || istDate.toISOString().split('T')[0];
+        const endDate = req.query.endDate || istDate.toISOString().split('T')[0];
+        const location = req.query.location || user.Location_Id;
+        const isMember = req.query.isMember;
+        const platform = req.query.platform;
+
+        // Get sessions for the specified date range and location
+        const sessions = await sessionService.getSessionsForDateRange(startDate, endDate, location, isMember, platform);
+
+        if (!sessions || sessions.length === 0) {
+            return res.render('sessions/logs', {
+                sessions: [],
+                startDate: startDate,
+                endDate: endDate,
+                user, // Pass user to the view
+            });
+        }
+
+        // Render the page and pass the sessions, date range, and locations
+        res.render('sessions/logs', {
+            sessions,
+            startDate: startDate,
+            endDate: endDate,
+            user, // Pass user to the view
+            locations: await sessionService.getAllLocations(), // Fetch all locations for the dropdown
+        });
+    } catch (error) {
+        console.error('Error fetching sessions:', error);
+        res.status(500).send('Error loading sessions');
+    }
+};
+
 exports.handleQrScan = (req, res) => {
     const token = req.body.token;
     const secretKey = 'secret_key_123';

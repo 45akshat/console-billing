@@ -13,6 +13,7 @@
         
     <!-- A hidden input or data attribute to store the session ID -->
     <div id="sessionData" data-session-id="<%= session._id %>"></div>
+    <input type="hidden" name="sessionId" value="<%= session._id %>">
 
         <!-- First Form (Design to Keep) -->
         <form id="sessionForm" method="POST">

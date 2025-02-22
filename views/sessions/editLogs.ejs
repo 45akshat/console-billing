@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Session Logs</title>
+    <link rel="stylesheet" href="/sessions/all.css">
+    <style>
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .highlight {
+            background-color: #ffdddd;
+        }
+        .nested-data {
+            margin: 0;
+            padding: 0;
+        }
+        .nested-data li {
+            list-style: none;
+            margin-bottom: 4px;
+        }
+        .customers-list {
+            margin: 0;
+            padding: 0;
+        }
+        .customers-list li {
+            list-style: none;
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Side Menu remains the same -->
+    <aside class="side-menu">
+        <nav>
+            <ul>
+                <li><a href="/" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="/sessions/scan"><i class="fas fa-sign-in-alt"></i> Scan QR</a></li>
+                <li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <li><a href="/sessions/create"><i class="fas fa-plus-circle"></i> Create Session</a></li>
+                <li><a href="/sessions/all"><i class="fas fa-list"></i> All Sessions</a></li>
+                <li><a href="/cashlogs/create"><i class="fas fa-money-bill-wave"></i> Create Cash Log</a></li>
+                <li><a href="/cashlogs/all"><i class="fas fa-file-alt"></i> All Cash Logs</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main>
+        <h1 class="page-title">Edit Session Logs</h1>
+
+        <!-- Date Filter Section -->
+        <section class="filter-section">
+            <form method="GET" action="/edit/logs" class="filter-form">
+                <label for="startDate">Start Date: </label>
+                <input type="date" id="startDate" name="startDate" value="<%= startDate %>" required>
+                <label for="endDate">End Date: </label>
+                <input type="date" id="endDate" name="endDate" value="<%= endDate %>" required>
+                <button type="submit">Filter</button>
+            </form>
+        </section>
+
+        <section class="edit-logs-data-section">
+            <h2>Edit Logs Details</h2>
+            <% if (editLogs && editLogs.length > 0) { %>
+                <% editLogs.forEach(log => { %>
+                    <div class="session-data-container">
+                        <hr style="border: 1px solid #eee; margin: 20px 0; margin-top: 40px;">
+                        <h3 >Session ID: <%= log.sessionId %></h3>
+                        <p><strong>Edited By:</strong> <%= log.editedBy %></p>
+                        <p><strong>Edited At:</strong> <%= new Date(log.editedAt).toLocaleString('en-GB', { timeZone: 'UTC' }) %></p>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Session ID</th>
+                                        <th>UserID</th>
+                                        <th>Location_Id</th>
+                                        <th>Platform</th>
+                                        <th>Table Number</th>
+                                        <th>Primary Contact</th>
+                                        <th>Is Member</th>
+                                        <th>Game</th>
+                                        <th>Customers</th>
+                                        <th>Payment</th>
+                                        <th>Discount</th>
+                                        <th>Cash Discount</th>
+                                        <th>Total Price</th>
+                                        <th>Coupon</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Old Session Data Row -->
+                                    <tr>
+                                        <td><strong>Old Data</strong></td>
+                                        <td><%= log.oldSessionData.UserID %></td>
+                                        <td><%= log.oldSessionData.Location_Id %></td>
+                                        <td><%= log.oldSessionData.platform %></td>
+                                        <td><%= log.oldSessionData.tableNumber %></td>
+                                        <td>
+                                            <ul class="nested-data">
+                                                <li>Name: <%= log.oldSessionData.primaryContact.name %></li>
+                                                <li>Contact: <%= log.oldSessionData.primaryContact.contact %></li>
+                                            </ul>
+                                        </td>
+                                        <td><%= log.oldSessionData.isMember %></td>
+                                        <td><%= log.oldSessionData.game %></td>
+                                        <td>
+                                            <ul class="customers-list">
+                                            <% log.oldSessionData.customers.forEach(customer => { %>
+                                                <li>Name: <%= customer.name %>, Duration: <%= customer.sessionDuration %>h</li>
+                                            <% }) %>
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <ul class="nested-data">
+                                                <li>Cash: ₹<%= log.oldSessionData.payment.cash %></li>
+                                                <li>Online: ₹<%= log.oldSessionData.payment.online %></li>
+                                                <li>Wallet: ₹<%= log.oldSessionData.payment.wallet %></li>
+                                            </ul>
+                                        </td>
+                                        <td><%= log.oldSessionData.discount %></td>
+                                        <td><%= log.oldSessionData.cash_discount %></td>
+                                        <td>₹<%= log.oldSessionData.totalPrice %></td>
+                                        <td><%= log.oldSessionData.coupon %></td>
+                                    </tr>
+
+                                    <!-- New Session Data Row -->
+                                    <tr>
+                                        <td><strong>New Data</strong></td>
+                                        <td class="<%= log.oldSessionData.UserID !== log.newSessionData.UserID ? 'highlight' : '' %>">
+                                            <%= log.newSessionData.UserID %>
+                                        </td>
+                                        <td class="<%= log.oldSessionData.Location_Id !== log.newSessionData.Location_Id ? 'highlight' : '' %>">
+                                            <%= log.newSessionData.Location_Id %>
+                                        </td>
+                                        <td class="<%= log.oldSessionData.platform !== log.newSessionData.platform ? 'highlight' : '' %>">
+                                            <%= log.newSessionData.platform %>
+                                        </td>
+                                        <td class="<%= log.oldSessionData.tableNumber !== log.newSessionData.tableNumber ? 'highlight' : '' %>">
+                                            <%= log.newSessionData.tableNumber %>
+                                        </td>
+                                        <td class="<%= JSON.stringify(log.oldSessionData.primaryContact) !== JSON.stringify(log.newSessionData.primaryContact) ? 'highlight' : '' %>">
+                                            <ul class="nested-data">
+                                                <li>Name: <%= log.newSessionData.primaryContact.name %></li>
+                                                <li>Contact: <%= log.newSessionData.primaryContact.contact %></li>
+                                            </ul>
+                                        </td>
+                                        <td class="<%= log.oldSessionData.isMember !== log.newSessionData.isMember ? 'highlight' : '' %>">
+                                            <%= log.newSessionData.isMember %>
+                                        </td>
+                                        <td class="<%= log.oldSessionData.game !== log.newSessionData.game ? 'highlight' : '' %>">
+                                            <%= log.newSessionData.game %>
+                                        </td>
+                                        <td class="<%= JSON.stringify(log.oldSessionData.customers.map(c => ({ name: c.name, sessionDuration: c.sessionDuration }))) !== JSON.stringify(log.newSessionData.customers.map(c => ({ name: c.name, sessionDuration: c.sessionDuration }))) ? 'highlight' : '' %>">
+                                            <ul class="customers-list">
+                                            <% log.newSessionData.customers.forEach(customer => { %>
+                                                <li>Name: <%= customer.name %>, Duration: <%= customer.sessionDuration %>h</li>
+                                            <% }) %>
+                                            </ul>
+                                        </td>
+                                        <td class="<%= JSON.stringify(log.oldSessionData.payment) !== JSON.stringify(log.newSessionData.payment) ? 'highlight' : '' %>">
+                                            <ul class="nested-data">
+                                                <li>Cash: ₹<%= log.newSessionData.payment.cash %></li>
+                                                <li>Online: ₹<%= log.newSessionData.payment.online %></li>
+                                                <li>Wallet: ₹<%= log.newSessionData.payment.wallet %></li>
+                                            </ul>
+                                        </td>
+                                        <td class="<%= log.oldSessionData.discount !== log.newSessionData.discount ? 'highlight' : '' %>">
+                                            <%= log.newSessionData.discount %>
+                                        </td>
+                                        <td class="<%= log.oldSessionData.cash_discount !== log.newSessionData.cash_discount ? 'highlight' : '' %>">
+                                            <%= log.newSessionData.cash_discount %>
+                                        </td>
+                                        <td class="<%= log.oldSessionData.totalPrice !== log.newSessionData.totalPrice ? 'highlight' : '' %>">
+                                            ₹<%= log.newSessionData.totalPrice %>
+                                        </td>
+                                        <td class="<%= log.oldSessionData.coupon !== log.newSessionData.coupon ? 'highlight' : '' %>">
+                                            <%= log.newSessionData.coupon %>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>No edit logs found</p>
+            <% } %>
+        </section>
+    </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = "<%= startDate || today %>";
+            document.getElementById('endDate').value = "<%= endDate || today %>";
+        });
+    </script>
+</body>
+</html>
