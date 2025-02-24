@@ -9,10 +9,27 @@
     function showSuccessPopup() {
       alert('User wallet updated successfully');
     }
+
+    async function fetchTotalBalance() {
+      try {
+        const response = await fetch('/users/wallets/totalBalance');
+        const data = await response.json();
+        if (response.ok) {
+          document.getElementById('totalBalance').innerText = `Total Wallet Balance: ${data.totalBalance}`;
+        } else {
+          console.error('Error fetching total balance:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching total balance:', error);
+      }
+    }
+
+    window.onload = fetchTotalBalance;
   </script>
 </head>
 <body>
   <h1>Users Data</h1>
+  <div id="totalBalance">Total Wallet Balance: Loading...</div>
   <table border="1">
     <thead>
       <tr>

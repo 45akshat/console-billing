@@ -155,6 +155,21 @@ const updateUserWallet = async (req, res) => {
   }
 };
 
+// Get total balance in wallet of all users combined
+const getTotalWalletBalance = async (req, res) => {
+  try {
+    const totalBalance = await userService.getTotalWalletBalance();
+    res.status(200).json({
+      message: 'Total wallet balance retrieved successfully',
+      totalBalance
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+};
+
 module.exports = {
   createUser,
   getUserByUserID,
@@ -164,5 +179,6 @@ module.exports = {
   checkLoggedInToday,
   getAllUsersWithWallet,
   renderUsersPage,
-  updateUserWallet
+  updateUserWallet,
+  getTotalWalletBalance
 };

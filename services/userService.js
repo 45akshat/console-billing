@@ -104,6 +104,19 @@ const checkLoggedInToday = async (userID) => {
   }
 };
 
+// Get total balance in wallet of all users combined
+const getTotalWalletBalance = async () => {
+  try {
+    const users = await User.find();
+    const totalBalance = users.reduce((acc, user) => {
+      return acc + (user.Wallet_Info?.balance || 0);
+    }, 0);
+    return totalBalance;
+  } catch (error) {
+    throw new Error(`Error calculating total wallet balance: ${error.message}`);
+  }
+};
+
 module.exports = {
   createUser,
   getUserByUserID,
@@ -112,5 +125,6 @@ module.exports = {
   getAllUsers,
   getAllUsersWithWallet,
   checkLoggedInToday,
-  updateUserWallet
+  updateUserWallet,
+  getTotalWalletBalance
 };
