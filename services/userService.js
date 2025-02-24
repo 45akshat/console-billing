@@ -110,7 +110,7 @@ const getTotalWalletBalance = async () => {
     const users = await User.find();
     let totalBalance = 0;
     users.forEach((user) => {
-      totalBalance += user.Wallet_Info.Balance;
+      totalBalance += user.Wallet_Info;
     });
     return totalBalance;
   } catch (error) {
