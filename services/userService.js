@@ -108,9 +108,10 @@ const checkLoggedInToday = async (userID) => {
 const getTotalWalletBalance = async () => {
   try {
     const users = await User.find();
-    const totalBalance = users.reduce((acc, user) => {
-      return acc + (user.Wallet_Info?.balance || 0);
-    }, 0);
+    let totalBalance = 0;
+    users.forEach((user) => {
+      totalBalance += user.Wallet_Info.Balance;
+    });
     return totalBalance;
   } catch (error) {
     throw new Error(`Error calculating total wallet balance: ${error.message}`);

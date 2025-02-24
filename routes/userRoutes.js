@@ -19,7 +19,7 @@ router.get('/users/:userID', userController.getUserByUserID);
 router.put('/users/:userID', userController.updateUser);
 
 // Route to get total wallet balance of all users combined
-router.get('/users/wallets/totalBalance', userController.getTotalWalletBalance);
+router.get('/wallets/totalBalance', userController.getTotalWalletBalance);
 
 // Route to delete user by UserID
 router.delete('/users/:userID', userController.deleteUser);
