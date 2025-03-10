@@ -49,7 +49,7 @@ exports.createSession = async (req, res) => {
         updateCashInHand(user.Location_Id, sessionData.payment.cash);
 
 
-        sendTemplateMessage("91"+sessionData.primaryContact.contact, 'session_msg', 'session_msg', [
+        sendTemplateMessage("91"+sessionData.primaryContact.contact, 'session_msg2', 'session_msg2', [
             { name: 'total_price', value: sessionData.totalPrice }])
 
         // Send the response with the created session
