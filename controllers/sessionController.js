@@ -2,6 +2,7 @@ const { updateCashInHand, deductWalletAmount, addWalletAmount } = require('../se
 const sessionService = require('../services/sessionService');
 const jwt = require('jsonwebtoken');
 const EditSession = require('../models/EditSession');
+const { sendTemplateMessage } = require('../services/whatsappService');
 
 // Helper function to convert date to IST
 const convertToIST = (date) => {
@@ -47,6 +48,9 @@ exports.createSession = async (req, res) => {
 
         updateCashInHand(user.Location_Id, sessionData.payment.cash);
 
+
+        sendTemplateMessage("91"+sessionData.primaryContact.contact, 'intro', 'intro')
+
         // Send the response with the created session
         res.status(201).json({
             success: true,  // Add success field
@@ -61,6 +65,7 @@ exports.createSession = async (req, res) => {
         });
     }
 };
+
 
 exports.updateSession = async (req, res) => {
     try {
