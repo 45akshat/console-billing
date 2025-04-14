@@ -502,6 +502,9 @@ function updateCustomerIndexes() {
                 const wallet = parseFloat(document.getElementById("primaryWallet").value) || 0;
                 const primaryName = formData.get("primaryContact[full_name]");
                 const primaryContact = formData.get("primaryContact[phoneNumber]");
+                // Sanitize primaryName and primaryContact to replace backticks with empty strings
+                const sanitizedPrimaryName = primaryName.replace(/`/g, "");
+                const sanitizedPrimaryContact = primaryContact.replace(/`/g, "");
                 const game = document.getElementById("gameDropdown").value;
                 const totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
                 
@@ -547,8 +550,8 @@ function updateCustomerIndexes() {
                     platform,
                     tableNumber: parseInt(document.getElementById("tableNumber").value),
                     primaryContact: {
-                        name: primaryName,
-                        contact: primaryContact,
+                        name: sanitizedPrimaryName,
+                        contact: sanitizedPrimaryContact,
                     },
                     isMember,
                     game,

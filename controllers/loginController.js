@@ -55,7 +55,8 @@ const verifyUser = async (req, res) => {
 
   const result = await loginService.verifyUser(Location_Id, Password);
 
-console.log(result)
+  console.log(result)
+  
 
     // Send the JWT as an HTTP-only cookie
     res.cookie('token', result.token, {
