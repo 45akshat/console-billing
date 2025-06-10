@@ -471,7 +471,11 @@ function updateCustomerIndexes() {
                         
                     alert(`Coupon applied! Total price after applying reward: ₹${discountedCPrice}`);
                 } else {
+                    const couponCode = document.getElementById('couponCode').value.trim();
+                    couponCode.value = ''; // Clear the coupon code input fie
                     alert(data.message || 'Invalid coupon code or coupon expired.'); // Show error message if coupon is invalid or expired
+
+
                 }
             } catch (error) {
                 console.error('Error verifying coupon:', error);
@@ -496,6 +500,8 @@ function updateCustomerIndexes() {
             sessionForm.addEventListener('submit', async function (e) {
                 e.preventDefault(); // Prevent the default form submission behavior
                 console.log('Form submitted!');
+
+                checkCoupon();
 
                 const formData = new FormData(sessionForm);
                 const platform = document.getElementById("platformInput").value;
