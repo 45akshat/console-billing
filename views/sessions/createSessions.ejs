@@ -416,7 +416,7 @@ function updateCustomerIndexes() {
                 // Get the coupon code and apply the reward if any
                 const formData = new FormData(sessionForm);
 
-                const couponCode = document.getElementById('couponCode').value.trim();
+                let couponCode = document.getElementById('couponCode').value.trim();
                 const platform = document.getElementById("platformInput").value;
                 const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
                 const wallet = document.getElementById(`primaryWallet`).value;
@@ -439,6 +439,7 @@ function updateCustomerIndexes() {
 
             console.log(couponCode)
             try {
+                couponCode = couponCode.uppercase(); // Convert coupon code to uppercase for consistency
                 // Make a GET request to fetch coupon data from the backend API using the entered coupon code
                 const response = await fetch(`/codes/codes/${encodeURIComponent(couponCode)}`);
 
