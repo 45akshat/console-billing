@@ -471,7 +471,7 @@ function updateCustomerIndexes() {
                         
                     alert(`Coupon applied! Total price after applying reward: ₹${discountedCPrice}`);
                 } else {
-                    const couponCode = document.getElementById('couponCode').value.trim();
+                    const couponCode = document.getElementById('couponCode')
                     couponCode.value = ''; // Clear the coupon code input fie
                     alert(data.message || 'Invalid coupon code or coupon expired.'); // Show error message if coupon is invalid or expired
 
