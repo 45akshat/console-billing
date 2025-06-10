@@ -503,7 +503,7 @@ setTimeout(() => {
                 e.preventDefault(); // Prevent the default form submission behavior
                 console.log('Form submitted!');
 
-                checkCoupon();
+                await checkCoupon();
 
                 const formData = new FormData(sessionForm);
                 const platform = document.getElementById("platformInput").value;
