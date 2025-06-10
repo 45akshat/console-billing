@@ -503,6 +503,7 @@ setTimeout(() => {
             sessionForm.addEventListener('submit', async function (e) {
                 e.preventDefault(); // Prevent the default form submission behavior
                 console.log('Form submitted!');
+                await calculateTotalPrice();
 
                 await checkCoupon();
 
