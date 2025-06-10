@@ -439,7 +439,6 @@ function updateCustomerIndexes() {
 
             console.log(couponCode)
             try {
-                couponCode = couponCode.uppercase(); // Convert coupon code to uppercase for consistency
                 // Make a GET request to fetch coupon data from the backend API using the entered coupon code
                 const response = await fetch(`/codes/codes/${encodeURIComponent(couponCode)}`);
 
