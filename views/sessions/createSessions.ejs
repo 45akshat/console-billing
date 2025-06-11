@@ -504,12 +504,13 @@ setTimeout(() => {
                 e.preventDefault(); // Prevent the default form submission behavior
                 console.log('Form submitted!');
                 await calculateTotalPrice();
-
-                await checkCoupon();
+                if(document.getElementById('couponCode').value == ""){
+                    await checkCoupon();
+                }
 
                 const formData = new FormData(sessionForm);
                 const platform = document.getElementById("platformInput").value;
-                const wallet = parseFloat(document.getElementById("primaryWallet").value) || 0;
+                const wallet = parseFloat(document.getElementById("primaryWalchlet").value) || 0;
                 const primaryName = formData.get("primaryContact[full_name]");
                 const primaryContact = formData.get("primaryContact[phoneNumber]");
                 // Sanitize primaryName and primaryContact to replace backticks with empty strings
