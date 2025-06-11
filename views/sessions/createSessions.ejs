@@ -504,7 +504,7 @@ setTimeout(() => {
                 e.preventDefault(); // Prevent the default form submission behavior
                 console.log('Form submitted!');
                 await calculateTotalPrice();
-                if(document.getElementById('couponCode').value == ""){
+                if(document.getElementById('couponCode').value != ""){
                     await checkCoupon();
                 }
 
