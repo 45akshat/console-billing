@@ -152,6 +152,15 @@
         // Variable to store membership status
         let isMember = false;
 
+        // Prevent backtick (`) character in all input fields
+        document.addEventListener('input', function(e) {
+            if (e.target.tagName === 'INPUT' && typeof e.target.value === 'string') {
+                if (e.target.value.includes('`')) {
+                    e.target.value = e.target.value.replace(/`/g, '');
+                }
+            }
+        });
+
 
         // Rewards Logic
         const rewards = {
@@ -520,6 +529,7 @@ setTimeout(() => {
                 const totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
                 
 
+
                 // Collect customer data
                 let customers = [];
                 let longestSessionDuration = 0; // Initialize the variable for longest session duration
@@ -661,6 +671,7 @@ setTimeout(() => {
                         customers.push({ name, sessionDuration, customerPrice });
                     }
                                             
+
                         if(discount>0){
                             totalPrice -= totalPrice * discount/100
                         }
