@@ -111,6 +111,33 @@ const getAllUsersWithWallet = async (req, res) => {
   }
 };
 
+
+
+const getAllUsersPaginated = async (req, res) => {
+  try {
+    const search = req.query.search || '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const query = {
+      $or: [
+        { Name: { $regex: search, $options: 'i' } },
+        { UserID: { $regex: search, $options: 'i' } }
+      ]
+    };
+
+    const users = await User.find(query).skip(skip).limit(limit);
+    const total = await User.countDocuments(query);
+    const hasMore = page * limit < total;
+
+    res.json({ users, hasMore });
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+}
+
+
 // Render the users' data page
 const renderUsersPage = async (req, res) => {
   try {
@@ -123,6 +150,7 @@ const renderUsersPage = async (req, res) => {
         ? locationId.replace('-admin', '') 
         : locationId;
 }
+
 
 
   if (!locationId) {
@@ -180,5 +208,6 @@ module.exports = {
   getAllUsersWithWallet,
   renderUsersPage,
   updateUserWallet,
-  getTotalWalletBalance
+  getTotalWalletBalance,
+  getAllUsersPaginated
 };
