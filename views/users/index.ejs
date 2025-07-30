@@ -1,11 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Users Data</title>
-  <link rel="stylesheet" href="/users/wallet.css">
+  <link rel="stylesheet" href="/users/wallet.css" />
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
     #totalBalance {
       text-align: center;
       font-size: 1.5em;
@@ -14,42 +32,48 @@
       margin-bottom: 20px;
     }
 
-    #searchBar {
-      margin: 20px;
-      text-align: center;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #999;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
     }
 
     #loadMoreBtn {
       display: block;
-      margin: 20px auto;
+      margin: 0 auto;
       padding: 10px 20px;
-      font-size: 1em;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 10px;
-      text-align: center;
-      border: 1px solid #ccc;
+    #loadMoreBtn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">Users Data</h1>
+
+  <h1>Users Data</h1>
+
+  <input type="text" id="searchInput" placeholder="Search by Name or UserID" oninput="searchUsers()" />
+
   <div id="totalBalance">Total Wallet Balance: Loading...</div>
 
-  <!-- Search Bar -->
-  <div id="searchBar">
-    <input type="text" id="searchInput" placeholder="Search by name or UserID">
-    <button onclick="resetAndLoadUsers()">Search</button>
-  </div>
-
-  <!-- Users Table -->
   <table>
     <thead>
       <tr>
@@ -59,27 +83,24 @@
         <th>Actions</th>
       </tr>
     </thead>
-    <tbody id="usersTableBody"></tbody>
+    <tbody id="userTableBody">
+      <!-- Dynamically loaded rows go here -->
+    </tbody>
   </table>
 
-  <!-- Load More Button -->
-  <button id="loadMoreBtn" onclick="loadUsers()">Load More</button>
+  <button id="loadMoreBtn" onclick="loadMore()">Load More</button>
 
   <script>
-    let page = 1;
-    let search = '';
+    let currentPage = 1;
     let hasMore = true;
-
-    function showSuccessPopup() {
-      alert('User wallet updated successfully');
-    }
+    let searchQuery = '';
 
     async function fetchTotalBalance() {
       try {
         const response = await fetch('/users/wallets/totalBalance');
         const data = await response.json();
         if (response.ok) {
-          document.getElementById('totalBalance').innerText = `Total Wallet Balance: ${data.totalBalance}`;
+          document.getElementById('totalBalance').textContent = `Total Wallet Balance: ${data.totalBalance}`;
         } else {
           console.error('Error fetching total balance:', data.message);
         }
@@ -88,67 +109,87 @@
       }
     }
 
-    async function loadUsers() {
-      if (!hasMore) return;
-
-      const response = await fetch(`/users/paginated?search=${encodeURIComponent(search)}&page=${page}&limit=10`);
-      const data = await response.json();
-
-      data.users.forEach(user => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${user.UserID}</td>
-          <td>${user.Name}</td>
-          <td>${JSON.stringify(user.Wallet_Info)}</td>
-          <td>
-            <form onsubmit="event.preventDefault(); updateWallet('${user.UserID}')">
-              <input type="text" name="Wallet_Info" id="wallet_${user.UserID}" value='${JSON.stringify(user.Wallet_Info)}'>
-              <button type="submit">Update Wallet</button>
-            </form>
-          </td>
-        `;
-        document.getElementById('usersTableBody').appendChild(row);
-      });
-
-      hasMore = data.hasMore;
-      if (!hasMore) {
-        document.getElementById('loadMoreBtn').style.display = 'none';
+    async function fetchUsers(reset = false) {
+      if (reset) {
+        currentPage = 1;
+        document.getElementById('userTableBody').innerHTML = '';
       }
 
-      page++;
+      try {
+        const response = await fetch(`/users/paginated?page=${currentPage}&limit=10&search=${encodeURIComponent(searchQuery)}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          data.users.forEach(user => {
+            const row = document.createElement('tr');
+            const walletValue = JSON.stringify(user.Wallet_Info || {});
+            row.innerHTML = `
+              <td>${user.UserID}</td>
+              <td>${user.Name}</td>
+              <td>${walletValue}</td>
+              <td>
+                <form onsubmit="event.preventDefault(); updateWallet('${user.UserID}')">
+                  <input type="text" id="wallet_${user.UserID}" value='${walletValue.replace(/"/g, '&quot;')}'>
+                  <button type="submit">Update Wallet</button>
+                </form>
+              </td>
+            `;
+            document.getElementById('userTableBody').appendChild(row);
+          });
+
+          hasMore = data.hasMore;
+          document.getElementById('loadMoreBtn').style.display = hasMore ? 'block' : 'none';
+        } else {
+          alert('Failed to load users');
+        }
+      } catch (err) {
+        console.error('Error fetching users:', err);
+        alert('Something went wrong!');
+      }
     }
 
-    function resetAndLoadUsers() {
-      search = document.getElementById('searchInput').value;
-      page = 1;
-      hasMore = true;
-      document.getElementById('usersTableBody').innerHTML = '';
-      document.getElementById('loadMoreBtn').style.display = 'block';
-      loadUsers();
+    function loadMore() {
+      if (hasMore) {
+        currentPage++;
+        fetchUsers();
+      }
+    }
+
+    function searchUsers() {
+      searchQuery = document.getElementById('searchInput').value.trim();
+      fetchUsers(true);
     }
 
     async function updateWallet(userID) {
-      const walletInfo = document.getElementById(`wallet_${userID}`).value;
-      const response = await fetch(`/users/users/${userID}/wallet`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ Wallet_Info: walletInfo })
-      });
+      const input = document.getElementById(`wallet_${userID}`);
+      let value = input.value;
 
-      if (response.ok) {
-        showSuccessPopup();
-      } else {
-        alert('Error updating wallet');
+      try {
+        const parsed = JSON.parse(value); // Validate JSON
+        const res = await fetch(`/users/${userID}/wallet`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ Wallet_Info: JSON.stringify(parsed) })
+        });
+
+        if (res.ok) {
+          alert('Wallet updated successfully!');
+          fetchTotalBalance(); // Refresh balance
+        } else {
+          const error = await res.json();
+          alert('Error updating wallet: ' + error.message);
+        }
+      } catch (e) {
+        alert('Invalid JSON format in Wallet Info.');
       }
     }
 
-    // On page load
+    // Initial load
     window.onload = () => {
       fetchTotalBalance();
-      loadUsers();
+      fetchUsers();
     };
   </script>
+
 </body>
 </html>

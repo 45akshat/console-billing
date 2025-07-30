@@ -27,6 +27,7 @@ router.delete('/users/:userID', userController.deleteUser);
 // Route to get all users
 router.get('/users', userController.getAllUsers);
 
+
 router.get('/users/paginated', userController.getAllUsersPaginated);
 
 

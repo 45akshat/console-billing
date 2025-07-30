@@ -118,6 +118,32 @@ const getTotalWalletBalance = async () => {
   }
 };
 
+
+const getUsersPaginated = async ({ page = 1, limit = 10, search = '' }) => {
+  const skip = (page - 1) * limit;
+  const query = search
+    ? {
+        $or: [
+          { Name: { $regex: search, $options: 'i' } },
+          { UserID: { $regex: search, $options: 'i' } }
+        ]
+      }
+    : {};
+
+  const users = await User.find(query)
+    .skip(skip)
+    .limit(parseInt(limit))
+    .lean();
+
+  const total = await User.countDocuments(query);
+  return {
+    users,
+    total,
+    hasMore: skip + users.length < total
+  };
+};
+
+
 module.exports = {
   createUser,
   getUserByUserID,
@@ -127,5 +153,6 @@ module.exports = {
   getAllUsersWithWallet,
   checkLoggedInToday,
   updateUserWallet,
-  getTotalWalletBalance
+  getTotalWalletBalance,
+  getUsersPaginated
 };

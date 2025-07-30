@@ -112,30 +112,16 @@ const getAllUsersWithWallet = async (req, res) => {
 };
 
 
-
-const getAllUsersPaginated = async (req, res) => {
+// GET users with pagination and optional search
+const getUsersPaginated = async (req, res) => {
   try {
-    const search = req.query.search || '';
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-    const skip = (page - 1) * limit;
-
-    const query = {
-      $or: [
-        { Name: { $regex: search, $options: 'i' } },
-        { UserID: { $regex: search, $options: 'i' } }
-      ]
-    };
-
-    const users = await User.find(query).skip(skip).limit(limit);
-    const total = await User.countDocuments(query);
-    const hasMore = page * limit < total;
-
-    res.json({ users, hasMore });
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching users' });
+    const { page = 1, limit = 10, search = '' } = req.query;
+    const paginatedUsers = await userService.getUsersPaginated({ page, limit, search });
+    res.status(200).json(paginatedUsers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
 
 // Render the users' data page
@@ -209,5 +195,5 @@ module.exports = {
   renderUsersPage,
   updateUserWallet,
   getTotalWalletBalance,
-  getAllUsersPaginated
+  getUsersPaginated
 };
