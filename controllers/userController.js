@@ -111,19 +111,6 @@ const getAllUsersWithWallet = async (req, res) => {
   }
 };
 
-
-// GET users with pagination and optional search
-const getUsersPaginated = async (req, res) => {
-  try {
-    const { page = 1, limit = 10, search = '' } = req.query;
-    const paginatedUsers = await userService.getUsersPaginated({ page, limit, search });
-    res.status(200).json(paginatedUsers);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
 // Render the users' data page
 const renderUsersPage = async (req, res) => {
   try {
@@ -136,7 +123,6 @@ const renderUsersPage = async (req, res) => {
         ? locationId.replace('-admin', '') 
         : locationId;
 }
-
 
 
   if (!locationId) {
@@ -194,6 +180,5 @@ module.exports = {
   getAllUsersWithWallet,
   renderUsersPage,
   updateUserWallet,
-  getTotalWalletBalance,
-  getUsersPaginated
+  getTotalWalletBalance
 };

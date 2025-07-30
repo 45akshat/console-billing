@@ -1,106 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Users Data</title>
-  <link rel="stylesheet" href="/users/wallet.css" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    #searchInput {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    #totalBalance {
-      text-align: center;
-      font-size: 1.5em;
-      font-weight: bold;
-      color: #000000;
-      margin-bottom: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-
-    th, td {
-      border: 1px solid #999;
-      padding: 10px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f2f2f2;
-    }
-
-    #loadMoreBtn {
-      display: block;
-      margin: 0 auto;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    #loadMoreBtn:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-  </style>
-</head>
-<body>
-
-  <h1>Users Data</h1>
-
-  <input type="text" id="searchInput" placeholder="Search by Name or UserID" oninput="searchUsers()" />
-
-  <div id="totalBalance">Total Wallet Balance: Loading...</div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>UserID</th>
-        <th>Name</th>
-        <th>Wallet Info</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="userTableBody">
-      <!-- Dynamically loaded rows go here -->
-    </tbody>
-  </table>
-
-  <button id="loadMoreBtn" onclick="loadMore()">Load More</button>
-
+  <link rel="stylesheet" href="/users/wallet.css">
   <script>
-    let currentPage = 1;
-    let hasMore = true;
-    let searchQuery = '';
+    function showSuccessPopup() {
+      alert('User wallet updated successfully');
+    }
 
     async function fetchTotalBalance() {
       try {
         const response = await fetch('/users/wallets/totalBalance');
         const data = await response.json();
         if (response.ok) {
-          document.getElementById('totalBalance').textContent = `Total Wallet Balance: ${data.totalBalance}`;
+          document.getElementById('totalBalance').innerText = `Total Wallet Balance: ${data.totalBalance}`;
         } else {
           console.error('Error fetching total balance:', data.message);
         }
@@ -109,87 +24,65 @@
       }
     }
 
-    async function fetchUsers(reset = false) {
-      if (reset) {
-        currentPage = 1;
-        document.getElementById('userTableBody').innerHTML = '';
-      }
-
-      try {
-        const response = await fetch(`/users/paginated?page=${currentPage}&limit=10&search=${encodeURIComponent(searchQuery)}`);
-        const data = await response.json();
-
-        if (response.ok) {
-          data.users.forEach(user => {
-            const row = document.createElement('tr');
-            const walletValue = JSON.stringify(user.Wallet_Info || {});
-            row.innerHTML = `
-              <td>${user.UserID}</td>
-              <td>${user.Name}</td>
-              <td>${walletValue}</td>
-              <td>
-                <form onsubmit="event.preventDefault(); updateWallet('${user.UserID}')">
-                  <input type="text" id="wallet_${user.UserID}" value='${walletValue.replace(/"/g, '&quot;')}'>
-                  <button type="submit">Update Wallet</button>
-                </form>
-              </td>
-            `;
-            document.getElementById('userTableBody').appendChild(row);
-          });
-
-          hasMore = data.hasMore;
-          document.getElementById('loadMoreBtn').style.display = hasMore ? 'block' : 'none';
-        } else {
-          alert('Failed to load users');
-        }
-      } catch (err) {
-        console.error('Error fetching users:', err);
-        alert('Something went wrong!');
-      }
-    }
-
-    function loadMore() {
-      if (hasMore) {
-        currentPage++;
-        fetchUsers();
-      }
-    }
-
-    function searchUsers() {
-      searchQuery = document.getElementById('searchInput').value.trim();
-      fetchUsers(true);
-    }
-
-    async function updateWallet(userID) {
-      const input = document.getElementById(`wallet_${userID}`);
-      let value = input.value;
-
-      try {
-        const parsed = JSON.parse(value); // Validate JSON
-        const res = await fetch(`/users/${userID}/wallet`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ Wallet_Info: JSON.stringify(parsed) })
-        });
-
-        if (res.ok) {
-          alert('Wallet updated successfully!');
-          fetchTotalBalance(); // Refresh balance
-        } else {
-          const error = await res.json();
-          alert('Error updating wallet: ' + error.message);
-        }
-      } catch (e) {
-        alert('Invalid JSON format in Wallet Info.');
-      }
-    }
-
-    // Initial load
-    window.onload = () => {
-      fetchTotalBalance();
-      fetchUsers();
-    };
+    window.onload = fetchTotalBalance;
   </script>
+  <style>
+    #totalBalance {
+      text-align: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #000000;
+      margin-bottom: 20px;
 
+    }
+  </style>
+</head>
+<body>
+  <h1>Users Data</h1>
+  <div id="totalBalance">Total Wallet Balance: Loading...</div>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>UserID</th>
+        <th>Name</th>
+        <th>Wallet Info</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(user => { %>
+        <tr>
+          <td><%= user.UserID %></td>
+          <td><%= user.Name %></td>
+          <td><%= JSON.stringify(user.Wallet_Info) %></td>
+          <td>
+            <form action="/users/users/<%= user.UserID %>/wallet" method="POST" onsubmit="event.preventDefault(); updateWallet('<%= user.UserID %>');">
+              <input type="text" name="Wallet_Info" id="wallet_<%= user.UserID %>" value='<%= JSON.stringify(user.Wallet_Info) %>'>
+              <button type="submit">Update Wallet</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <script>
+    async function updateWallet(userID) {
+      const walletInfo = document.getElementById(`wallet_${userID}`).value;
+      const response = await fetch(`/users/users/${userID}/wallet`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ Wallet_Info: walletInfo })
+      });
+
+      if (response.ok) {
+        showSuccessPopup();
+      } else {
+        alert('Error updating wallet');
+      }
+    }
+  </script>
 </body>
 </html>
