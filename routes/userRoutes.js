@@ -28,7 +28,7 @@ router.delete('/users/:userID', userController.deleteUser);
 router.get('/users', userController.getAllUsers);
 
 
-router.get('/users/paginated', userController.getAllUsersPaginated);
+router.get('/users/paginated', userController.getUsersPaginated);
 
 
 // Route to check if user logged in today
