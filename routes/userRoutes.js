@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const verifyJwt = require('../middleware/jwt');
 
+
 // Route to create a new user
 router.post('/users', userController.createUser);
 // Route to update user wallet information (use POST and PUT methods for form submission)

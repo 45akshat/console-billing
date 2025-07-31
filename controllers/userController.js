@@ -16,6 +16,30 @@ const createUser = async (req, res) => {
   }
 };
 
+
+const fetchUsers = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = parseInt(req.query.offset) || 0;
+    const search = req.query.search || '';
+
+    const query = search
+      ? {
+          $or: [
+            { Name: { $regex: search, $options: 'i' } },
+            { UserID: { $regex: search, $options: 'i' } }
+          ]
+        }
+      : {};
+
+    const users = await User.find(query).skip(offset).limit(limit);
+
+    res.json({ users });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch users', error });
+  }
+};
+
 // Get a user by UserID
 const getUserByUserID = async (req, res) => {
   try {

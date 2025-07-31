@@ -6,6 +6,11 @@
   <title>Users Data</title>
   <link rel="stylesheet" href="/users/wallet.css">
   <script>
+    let currentPage = 0;
+    const usersPerPage = 30;
+    let allUsers = [];
+    let filteredUsers = [];
+
     function showSuccessPopup() {
       alert('User wallet updated successfully');
     }
@@ -24,49 +29,75 @@
       }
     }
 
-    window.onload = fetchTotalBalance;
-  </script>
-  <style>
-    #totalBalance {
-      text-align: center;
-      font-size: 1.5em;
-      font-weight: bold;
-      color: #000000;
-      margin-bottom: 20px;
-
+    function initializeUsers() {
+      // Users data is already available from server-side rendering
+      allUsers = <%- JSON.stringify(users) %>;
+      filteredUsers = [...allUsers];
+      loadMoreUsers();
     }
-  </style>
-</head>
-<body>
-  <h1>Users Data</h1>
-  <div id="totalBalance">Total Wallet Balance: Loading...</div>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>UserID</th>
-        <th>Name</th>
-        <th>Wallet Info</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% users.forEach(user => { %>
-        <tr>
-          <td><%= user.UserID %></td>
-          <td><%= user.Name %></td>
-          <td><%= JSON.stringify(user.Wallet_Info) %></td>
+
+    function filterUsers() {
+      const searchTerm = document.getElementById('nameSearch').value.toLowerCase().trim();
+      
+      if (searchTerm === '') {
+        filteredUsers = [...allUsers];
+      } else {
+        filteredUsers = allUsers.filter(user => 
+          user.Name.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      // Reset pagination
+      currentPage = 0;
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = '';
+      
+      // Show load more button again if there are filtered results
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
+      if (filteredUsers.length > usersPerPage) {
+        loadMoreBtn.style.display = 'block';
+      }
+
+      loadMoreUsers();
+    }
+
+    function loadMoreUsers() {
+      const tbody = document.getElementById('usersTableBody');
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
+      
+      const startIndex = currentPage * usersPerPage;
+      const endIndex = startIndex + usersPerPage;
+      const usersToShow = filteredUsers.slice(startIndex, endIndex);
+
+      usersToShow.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${user.UserID}</td>
+          <td>${user.Name}</td>
+          <td>${JSON.stringify(user.Wallet_Info)}</td>
           <td>
-            <form action="/users/users/<%= user.UserID %>/wallet" method="POST" onsubmit="event.preventDefault(); updateWallet('<%= user.UserID %>');">
-              <input type="text" name="Wallet_Info" id="wallet_<%= user.UserID %>" value='<%= JSON.stringify(user.Wallet_Info) %>'>
+            <form onsubmit="event.preventDefault(); updateWallet('${user.UserID}');">
+              <input type="text" name="Wallet_Info" id="wallet_${user.UserID}" value='${JSON.stringify(user.Wallet_Info)}'>
               <button type="submit">Update Wallet</button>
             </form>
           </td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+        `;
+        tbody.appendChild(row);
+      });
 
-  <script>
+      currentPage++;
+
+      // Hide load more button if no more users to load
+      if (endIndex >= filteredUsers.length) {
+        loadMoreBtn.style.display = 'none';
+      }
+
+      // Update the users count display
+      const totalShown = Math.min(currentPage * usersPerPage, filteredUsers.length);
+      document.getElementById('usersCount').innerText = 
+        `Showing ${totalShown} of ${filteredUsers.length} users`;
+    }
+
     async function updateWallet(userID) {
       const walletInfo = document.getElementById(`wallet_${userID}`).value;
       const response = await fetch(`/users/users/${userID}/wallet`, {
@@ -83,6 +114,98 @@
         alert('Error updating wallet');
       }
     }
+
+    window.onload = function() {
+      fetchTotalBalance();
+      initializeUsers();
+    };
   </script>
+  <style>
+    #totalBalance {
+      text-align: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #000000;
+      margin-bottom: 20px;
+    }
+
+    #usersCount {
+      text-align: center;
+      font-size: 1.1em;
+      margin-bottom: 15px;
+      color: #666;
+    }
+
+    #loadMoreBtn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #loadMoreBtn:hover {
+      background-color: #0056b3;
+    }
+
+    #loadMoreBtn:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .search-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #nameSearch {
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      width: 300px;
+      max-width: 100%;
+    }
+
+    #nameSearch:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    .search-label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Users Data</h1>
+  <div id="totalBalance">Total Wallet Balance: Loading...</div>
+  <div id="usersCount">Loading users...</div>
+  
+  <div class="search-container">
+    <label for="nameSearch" class="search-label">Search by Name:</label>
+    <input type="text" id="nameSearch" placeholder="Enter name to search..." oninput="filterUsers()">
+  </div>
+  
+  <table border="1">
+    <thead>
+      <tr>
+        <th>UserID</th>
+        <th>Name</th>
+        <th>Wallet Info</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="usersTableBody">
+      <!-- Users will be loaded here dynamically -->
+    </tbody>
+  </table>
+
+  <button id="loadMoreBtn" onclick="loadMoreUsers()">Load More (30)</button>
 </body>
 </html>
