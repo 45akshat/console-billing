@@ -7,7 +7,7 @@ exports.renderAllTournaments = async (req, res) => {
           // Get locationId from the decoded JWT user data
   let locationId = req.user.Location_Id;
   
-  if (locationId == "admin") {
+  if (locationId != "admin") {
     return res.status(400).json({ message: 'admin only' });
   }
 
@@ -35,7 +35,7 @@ exports.renderTournamentDetail = async (req, res) => {
   }
 
   
-  if (locationId == "admin") {
+  if (locationId != "admin") {
     return res.status(400).json({ message: 'admin only' });
   }
 
