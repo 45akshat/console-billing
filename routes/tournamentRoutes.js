@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const tournamentController = require('../controllers/tournamentController');
+const verifyJwt = require('../middleware/jwt');
 
 router.get('/',  verifyJwt, tournamentController.renderAllTournaments); // GET all tournaments
 router.get('/:id',  verifyJwt, tournamentController.renderTournamentDetail); // GET single tournament
