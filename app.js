@@ -68,6 +68,7 @@ app.use('/codes', codeRoutes); // Session-related routes (creating and listing s
 app.use('/login', loginRoutes); // Session-related routes (creating and listing sessions)
 app.use('/cashlogs', cashLogsRoutes); // Session-related routes (creating and listing sessions)
 app.use('/edit', editSessionRoutes); // Edit session routes
+app.use('/tournament', require('./routes/tournamentRoutes')); // Tournament routes
 
 // Start the server
 app.listen(PORT, async () => {
