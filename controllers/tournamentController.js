@@ -6,13 +6,10 @@ exports.renderAllTournaments = async (req, res) => {
   try {
           // Get locationId from the decoded JWT user data
   let locationId = req.user.Location_Id;
-
-  if (locationId !== 'admin') {
-    // Remove '-admin' from locationId if it contains it
-    locationId = locationId.includes('-admin') 
-        ? locationId.replace('-admin', '') 
-        : locationId;
-}
+  
+  if (locationId == "admin") {
+    return res.status(400).json({ message: 'admin only' });
+  }
 
 
   if (!locationId) {
@@ -32,16 +29,14 @@ exports.renderTournamentDetail = async (req, res) => {
           // Get locationId from the decoded JWT user data
   let locationId = req.user.Location_Id;
 
-  if (locationId !== 'admin') {
-    // Remove '-admin' from locationId if it contains it
-    locationId = locationId.includes('-admin') 
-        ? locationId.replace('-admin', '') 
-        : locationId;
-}
-
 
   if (!locationId) {
     return res.status(400).json({ message: 'Location ID is required' });
+  }
+
+  
+  if (locationId == "admin") {
+    return res.status(400).json({ message: 'admin only' });
   }
 
   
