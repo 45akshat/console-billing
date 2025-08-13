@@ -246,6 +246,8 @@
                     document.getElementById('primaryPhone').value = userData.user.contact;
                     document.getElementById('primaryWallet').value = userData.user.Wallet_Info;
                     document.getElementById('primaryUserID').value = userData.user.UserID;
+
+                    console.log("Primary User ID:", userData.user.UserID);
                 } else {
                     console.error("Error fetching user data:", response.statusText);
                 }
@@ -562,7 +564,10 @@ setTimeout(() => {
 
                 let primaryUserID = 'none'
                  primaryUserID = document.getElementById("primaryUserID").value;
-               
+                 if (primaryUserID === '') {
+                    primaryUserID = 'none'; // Set to 'none' if no UserID is provided
+                     console.log("Primary User ID:",primaryUserID);
+                 }
                 // Prepare session data to send to the backend
                 const sessionData = {
                     UserID: primaryUserID,
