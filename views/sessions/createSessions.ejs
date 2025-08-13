@@ -560,11 +560,9 @@ setTimeout(() => {
                 const istOffset = 330; // IST offset in minutes (UTC+5:30)
                 const istTime = new Date(now.getTime() + (istOffset * 60 * 1000));
 
-                let primaryUserID = document.getElementById("primaryUserID").value;
-                if (!primaryUserID) {
-                    primaryUserID = "none"
-                }
-
+                let primaryUserID = 'none'
+                 primaryUserID = document.getElementById("primaryUserID").value;
+               
                 // Prepare session data to send to the backend
                 const sessionData = {
                     UserID: primaryUserID,

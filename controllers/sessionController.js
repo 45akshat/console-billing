@@ -41,6 +41,8 @@ exports.createSession = async (req, res) => {
         // Log "Oops" if primaryUserID is null
         if (!sessionData.primaryUserID) {
             console.log("Oops");
+            console.log("No primary user ID found, setting to 'none'");
+            
         }
 
         // Create session using the service
