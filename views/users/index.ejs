@@ -15,6 +15,8 @@
       alert('User wallet updated successfully');
     }
 
+    
+
     async function fetchTotalBalance() {
       try {
         const response = await fetch('/users/wallets/totalBalance');
@@ -35,31 +37,33 @@
       filteredUsers = [...allUsers];
       loadMoreUsers();
     }
+  function filterUsers() {
+    const searchTerm = document.getElementById('nameSearch').value.toLowerCase().trim();
 
-    function filterUsers() {
-      const searchTerm = document.getElementById('nameSearch').value.toLowerCase().trim();
-      
-      if (searchTerm === '') {
-        filteredUsers = [...allUsers];
-      } else {
-        filteredUsers = allUsers.filter(user => 
-          user.Name.toLowerCase().includes(searchTerm)
-        );
-      }
-
-      // Reset pagination
-      currentPage = 0;
-      const tbody = document.getElementById('usersTableBody');
-      tbody.innerHTML = '';
-      
-      // Show load more button again if there are filtered results
-      const loadMoreBtn = document.getElementById('loadMoreBtn');
-      if (filteredUsers.length > usersPerPage) {
-        loadMoreBtn.style.display = 'block';
-      }
-
-      loadMoreUsers();
+    if (searchTerm === '') {
+      filteredUsers = [...allUsers];
+    } else {
+      filteredUsers = allUsers.filter(user => 
+        user.Name.toLowerCase().includes(searchTerm) || 
+        user.UserID.toLowerCase().includes(searchTerm)
+      );
     }
+
+    // Reset pagination
+    currentPage = 0;
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '';
+
+    // Show load more button again if there are filtered results
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (filteredUsers.length > usersPerPage) {
+      loadMoreBtn.style.display = 'block';
+    } else {
+      loadMoreBtn.style.display = 'none';
+    }
+
+    loadMoreUsers();
+  }
 
     function loadMoreUsers() {
       const tbody = document.getElementById('usersTableBody');
@@ -186,11 +190,12 @@
   <h1>Users Data</h1>
   <div id="totalBalance">Total Wallet Balance: Loading...</div>
   <div id="usersCount">Loading users...</div>
-  
+    
   <div class="search-container">
-    <label for="nameSearch" class="search-label">Search by Name:</label>
-    <input type="text" id="nameSearch" placeholder="Enter name to search..." oninput="filterUsers()">
+    <label for="nameSearch" class="search-label">Search by UserID or Name:</label>
+    <input type="text" id="nameSearch" placeholder="Enter UserID or Name..." oninput="filterUsers()">
   </div>
+
   
   <table border="1">
     <thead>
