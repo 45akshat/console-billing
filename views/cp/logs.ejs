@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CP Logs</title>
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background: #f9fafc;
+      color: #2c3e50;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 40px 0 20px;
+      font-size: 28px;
+      font-weight: 500;
+      color: #1a202c;
+    }
+
+    #search {
+      display: block;
+      margin: 0 auto 25px;
+      padding: 12px 16px;
+      width: 50%;
+      font-size: 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      outline: none;
+      transition: all 0.2s ease;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    #search:focus {
+      border-color: #3f51b5;
+      box-shadow: 0 0 0 3px rgba(63,81,181,0.15);
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 95%;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      text-align: center;
+      font-size: 14px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+      background-color: #3f51b5;
+      color: white;
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+      background-color: #fafbff;
+    }
+
+    tr:hover {
+      background-color: #f1f5ff;
+      transition: background 0.2s ease;
+    }
+
+    td.diff-positive {
+      color: #2e7d32;
+      font-weight: 600;
+    }
+
+    td.diff-negative {
+      color: #c62828;
+      font-weight: 600;
+    }
+
+    #pagination {
+      text-align: center;
+      margin: 25px 0;
+    }
+
+    #pagination button {
+      margin: 0 8px;
+      padding: 8px 18px;
+      border: none;
+      border-radius: 6px;
+      background: #3f51b5;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    #pagination button:hover:not(:disabled) {
+      background: #303f9f;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    #pagination button:disabled {
+      background: #c5cae9;
+      cursor: not-allowed;
+    }
+
+    /* Mobile-friendly */
+    @media (max-width: 768px) {
+      #search {
+        width: 80%;
+      }
+      table {
+        font-size: 12px;
+      }
+      th, td {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>CP Logs</h1>
+
+  <!-- Search Bar -->
+  <input type="text" id="search" placeholder="🔍 Search by User ID...">
+
+  <table id="logsTable">
+    <thead>
+      <tr>
+        <th>User ID</th>
+        <th>Monday</th>
+        <th>Tuesday</th>
+        <th>Wednesday</th>
+        <th>Thursday</th>
+        <th>Friday</th>
+        <th>Saturday</th>
+        <th>Sunday</th>
+        <th>Diff (Today - Yesterday)</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <!-- Rows injected by JS -->
+    </tbody>
+  </table>
+
+  <!-- Pagination Controls -->
+  <div id="pagination"></div>
+
+  <script>
+    const allLogs = <%- JSON.stringify(logs) %>;
+
+    const rowsPerPage = 50;
+    let currentPage = 1;
+    let filteredLogs = allLogs;
+
+    const tableBody = document.getElementById('tableBody');
+    const paginationDiv = document.getElementById('pagination');
+    const searchInput = document.getElementById('search');
+
+    const days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+    const todayIndex = new Date().getDay();
+    const yesterdayIndex = (todayIndex - 1 + 7) % 7;
+    const todayKey = days[todayIndex];
+    const yesterdayKey = days[yesterdayIndex];
+
+    function renderTable(logs, page = 1) {
+      tableBody.innerHTML = '';
+      const start = (page - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const pageLogs = logs.slice(start, end);
+
+      if (pageLogs.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="9">No CP logs found</td></tr>';
+        return;
+      }
+
+      pageLogs.forEach(log => {
+        const todayValue = log.week?.[todayKey] || 0;
+        const yesterdayValue = log.week?.[yesterdayKey] || 0;
+        const diff = todayValue - yesterdayValue;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${log.userId}</td>
+          <td>${log.week?.monday || 0}</td>
+          <td>${log.week?.tuesday || 0}</td>
+          <td>${log.week?.wednesday || 0}</td>
+          <td>${log.week?.thursday || 0}</td>
+          <td>${log.week?.friday || 0}</td>
+          <td>${log.week?.saturday || 0}</td>
+          <td>${log.week?.sunday || 0}</td>
+          <td class="${diff >= 0 ? 'diff-positive' : 'diff-negative'}">${diff}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    function renderPagination(logs) {
+      paginationDiv.innerHTML = '';
+      const totalPages = Math.ceil(logs.length / rowsPerPage);
+
+      if (totalPages <= 1) return;
+
+      const prevBtn = document.createElement('button');
+      prevBtn.innerText = '⟵ Prev';
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderTable(filteredLogs, currentPage);
+          renderPagination(filteredLogs);
+        }
+      };
+      paginationDiv.appendChild(prevBtn);
+
+      const nextBtn = document.createElement('button');
+      nextBtn.innerText = 'Next ⟶';
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderTable(filteredLogs, currentPage);
+          renderPagination(filteredLogs);
+        }
+      };
+      paginationDiv.appendChild(nextBtn);
+    }
+
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.toLowerCase();
+      filteredLogs = allLogs.filter(log =>
+        (log.userId || '').toLowerCase().includes(query)
+      );
+      currentPage = 1;
+      renderTable(filteredLogs, currentPage);
+      renderPagination(filteredLogs);
+    });
+
+    renderTable(filteredLogs, currentPage);
+    renderPagination(filteredLogs);
+  </script>
+</body>
+</html>

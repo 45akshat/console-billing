@@ -420,6 +420,36 @@ function updateCustomerIndexes() {
             }
         }
 
+             //---------------------
+            // made by Aman Chaurasiya
+            // syncTransactionToUser function
+            // This function will sync the session data to the user usin userid 
+            //---------------------
+
+              async function syncTransactionToUser(sessionData, userId) {
+                    try {
+                    const response = await fetch(`/sessions/user-transactions/sync`, {
+                      method: 'POST',
+                     headers: {
+                     'Content-Type': 'application/json',
+                       },
+                     body: JSON.stringify({
+                     userId: userId,
+                    sessionData: sessionData
+                     })
+          });
+
+        if (response.ok) {
+            console.log('Transaction synced to user successfully');
+        } else {
+            console.log('Failed to sync transaction to user');
+        }
+    } catch (error) {
+        console.error('Error syncing transaction:', error);
+    }
+}
+
+
         document.addEventListener('DOMContentLoaded', async () => {
 
             
@@ -513,13 +543,13 @@ setTimeout(() => {
 
             sessionForm.addEventListener('submit', async function (e) {
                 e.preventDefault(); // Prevent the default form submission behavior
-                console.log('Form submitted!');
+                console.log('Form submitted!');                
                 await calculateTotalPrice();
                 if(document.getElementById('couponCode').value != ""){
                     await checkCoupon();
-                }
-
+                }                 
                 const formData = new FormData(sessionForm);
+                const userID = formData.get('primaryUserID');
                 const platform = document.getElementById("platformInput").value;
                 const wallet = parseFloat(document.getElementById("primaryWallet").value) || 0;
                 const primaryName = formData.get("primaryContact[full_name]");
@@ -595,7 +625,12 @@ setTimeout(() => {
                 console.log(sessionData)
 
                 try {
+                    
+                    //---------------------------------
+                    // made by Aman Chaurasiya
                     // Submit session data to the backend
+                    // Sync the session data to the user if a UserID is provided
+                    //-----------------------------------
                     const response = await fetch("/sessions/create", {
                         method: "POST",
                         headers: {
@@ -608,7 +643,9 @@ setTimeout(() => {
                     if (response.ok) {
                         alert("Session created successfully!");
                         console.log(result);
-                    } else {
+                         window.location.reload();
+                        } else {
+                        
                         alert(`Error: ${result.message}`);
                         console.error(result.error);
                     }

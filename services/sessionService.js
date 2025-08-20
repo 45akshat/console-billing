@@ -228,3 +228,16 @@ exports.deleteSession = async (sessionId) => {
     }
 };
 
+//--------------------------------------------
+// made by Aman Chaurasiya
+// Get sessions by user ID
+//--------------------------------------------
+exports.getSessionsByUserId = async (userId) => {
+    try {
+        return await Session.find({ UserID: userId }).sort({ createdAt: -1 }); // Sort by most recent
+    } catch (error) {
+        console.error('Error fetching sessions for user:', error);
+        throw new Error('Error fetching sessions for user');
+    }
+};
+

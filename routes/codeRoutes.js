@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const codeController = require('../controllers/codeController');
 
+// router.get('/codes-all', codeController.getAllCodes);
+
+
+// Route to show all coupons with pagination on frontend
+router.get('/logs', codeController.renderCodesPage);
+
 // Create a new code
 router.post('/codes', codeController.createCodeController);
 

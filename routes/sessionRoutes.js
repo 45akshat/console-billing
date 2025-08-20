@@ -40,4 +40,13 @@ router.get('/:sessionId', sessionController.getSessionById);
 // Route to fetch all sessions
 router.get('/', sessionController.getAllSessions); 
 
+// Route to get user transaction history
+
+router.get('/user-transactions/:userId', verifyJwt, sessionController.getUserTransactionHistory);
+
+// Route to sync transaction to user
+router.post('/user-transactions/sync', verifyJwt, sessionController.syncTransactionToUser);
+
+
+
 module.exports = router;

@@ -1,5 +1,20 @@
 const Code = require('../models/Code');
 
+
+// Fetch all codes
+async function fetchAllCodes() {
+  try {
+    const codes = await Code.find({});
+    console.log('All Codes:', codes);
+    return codes;
+  } catch (error) {
+    console.error("Error fetching codes:", error);
+    return [];
+  }
+}
+
+
+
 // Create a new code
 const createCode = async (codeData) => {
   try {
@@ -155,4 +170,5 @@ module.exports = {
   checkCodeValidity,
   updateValidity,  // Add this method to the exports
   checkCodeForUser,
+  fetchAllCodes
 };

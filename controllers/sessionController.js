@@ -3,6 +3,7 @@ const sessionService = require('../services/sessionService');
 const jwt = require('jsonwebtoken');
 const EditSession = require('../models/EditSession');
 const { sendTemplateMessage } = require('../services/whatsappService');
+const Session = require('../models/Session');
 
 // Helper function to convert date to IST
 const convertToIST = (date) => {
@@ -44,10 +45,23 @@ exports.createSession = async (req, res) => {
             console.log("No primary user ID found, setting to 'none'");
             
         }
-
         // Create session using the service
         const session = await sessionService.createSession(sessionData);
 
+        //-----------------------------------
+        // made by Aman Chaurasiya
+        // Sync transaction to user if UserID is provided
+        // If UserID is not 'none', sync the transaction to the user
+        // This is done after the session is created to ensure the session data is available
+        //----------------------------------
+
+        // After WhatsApp notification in createSession():
+        if (sessionData.UserID && sessionData.UserID !== 'none') {
+         await exports.syncTransactionToUser(
+        { body: { userId: sessionData.UserID, sessionData: session } },
+        { json: (data) => console.log('Sync result:', data) }
+         );
+        }
         updateCashInHand(user.Location_Id, sessionData.payment.cash);
 
 
@@ -374,3 +388,78 @@ exports.deleteSession = async (req, res) => {
         });
     }
 };
+
+//--------------------------------------------
+// made by Aman Chaurasiya
+//  Get user transaction history from the session collection
+//--------------------------------------------
+
+exports. getUserTransactionHistory = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { page = 1, limit = 10, startDate, endDate } = req.query;
+
+        // Build query filter
+        let filter = { UserID: userId };
+        
+        // Add date filtering if provided
+        if (startDate || endDate) {
+            filter.createdAt = {};
+            if (startDate) filter.createdAt.$gte = new Date(startDate);
+            if (endDate) filter.createdAt.$lte = new Date(endDate);
+        }
+
+        // Fetch transactions with pagination
+        const transactions = await Session.find(filter)
+            .sort({ createdAt: -1 }) // Latest first
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .select('platform sessionNumber totalPrice createdAt primaryContact tableNumber payment discount'); // Select relevant fields
+
+        // Get total count for pagination
+        const totalTransactions = await Session.countDocuments(filter);
+
+        res.json({
+            success: true,
+            data: {
+                transactions,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(totalTransactions / limit),
+                    totalTransactions,
+                    hasMore: page < Math.ceil(totalTransactions / limit)
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching user transactions:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch transaction history'
+        });
+    }
+};
+
+
+exports.syncTransactionToUser = async (req, res) => {
+    try {
+        const { userId, sessionData } = req.body;
+        
+        // Here you can add any additional logic for user-specific transaction recording
+        // For now, we'll just return success since the data is already in the main database
+        
+        res.json({
+            success: true,
+            message: 'Transaction synced to user successfully'
+        });
+        
+    } catch (error) {
+        console.error('Error syncing transaction to user:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to sync transaction'
+        });
+    }
+};
+

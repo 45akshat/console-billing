@@ -1,5 +1,24 @@
 const codeService = require('../services/codeService');
 
+// Controller to get all codes
+async function getAllCodes(req, res) {
+  const codes = await codeService.fetchAllCodes();
+  res.json(codes);
+}
+
+
+// Render coupons page
+const renderCodesPage = async (req, res) => {
+  try {
+    const codes = await codeService.fetchAllCodes(); // fetch all codes from DB
+    res.render('codes/logs', { codes }); // pass to EJS
+  } catch (error) {
+    console.error('Error rendering codes page:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+
 // Controller to create a new code
 const createCodeController = async (req, res) => {
   try {
@@ -148,4 +167,6 @@ module.exports = {
   checkCodeValidityController,
   updateValidityController,
   checkCodeForUserController,
+  getAllCodes,
+  renderCodesPage
 };

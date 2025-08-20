@@ -6,6 +6,7 @@ const codeRoutes = require('./routes/codeRoutes');
 const loginRoutes = require('./routes/loginRoutes'); 
 const cashLogsRoutes = require('./routes/cashLogsRoutes'); 
 const editSessionRoutes = require('./routes/editSessionRoutes'); // Edit session routes
+const cpLogRoutes = require('./routes/cpLogsRoutes');
 const { connectDb } = require('./config/db'); // Database connection
 const path = require('path');
 
@@ -68,7 +69,9 @@ app.use('/codes', codeRoutes); // Session-related routes (creating and listing s
 app.use('/login', loginRoutes); // Session-related routes (creating and listing sessions)
 app.use('/cashlogs', cashLogsRoutes); // Session-related routes (creating and listing sessions)
 app.use('/edit', editSessionRoutes); // Edit session routes
+app.use('/referrals', require('./routes/referralLogsRoutes') ); // Edit session routes
 app.use('/tournament', require('./routes/tournamentRoutes')); // Tournament routes
+app.use('/cp', cpLogRoutes);
 
 // Start the server
 app.listen(PORT, async () => {
