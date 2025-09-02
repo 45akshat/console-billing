@@ -1,0 +1,14 @@
+{
+    "non_members": {
+        "1_HOUR": 100,
+        "2_HOURS": 100,
+        "3_HOURS_AND_MORE": 100,
+        "12_HOURS": 1200
+    },
+    "members": {
+        "1_HOUR": 100,
+        "2_HOURS": 100,
+        "3_HOURS_AND_MORE": 100,
+        "12_HOURS": 1200
+    }
+}
