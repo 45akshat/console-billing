@@ -2,13 +2,13 @@
     "non_members": {
         "1_HOUR": 60,
         "2_HOURS": 60,
-        "3_HOURS_AND_MORE": 50,
-        "12_HOURS": 500
+        "3_HOURS_AND_MORE": 60,
+        "12_HOURS": 400
     },
     "members": {
-        "1_HOUR": 60,
-        "2_HOURS": 60,
+        "1_HOUR": 50,
+        "2_HOURS": 50,
         "3_HOURS_AND_MORE": 50,
-        "12_HOURS": 500
+        "12_HOURS": 350
     }
 }
