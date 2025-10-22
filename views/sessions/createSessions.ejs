@@ -454,81 +454,114 @@ function updateCustomerIndexes() {
 
             
         async function checkCoupon() {
-                // Get the coupon code and apply the reward if any
-                const formData = new FormData(sessionForm);
+             // Get the coupon code and apply the reward if any
+         const formData = new FormData(sessionForm);
 
-                let couponCode = document.getElementById('couponCode').value.trim();
-                const platform = document.getElementById("platformInput").value;
-                const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
-                const wallet = document.getElementById(`primaryWallet`).value;
-                let totalPrice = parseFloat(document.getElementById("totalPrice").value); // Use the calculated price
+    let couponCode = document.getElementById('couponCode').value.trim();
+    const platform = document.getElementById("platformInput").value;
+    const pricing = isMember ? pc_pricing.members : pc_pricing.non_members;
+    const wallet = document.getElementById(`primaryWallet`).value;
+    let totalPrice = parseFloat(document.getElementById("totalPrice").value);
 
+    let longestSessionDuration = 0;
 
-                let longestSessionDuration = 0; // Initialize the variable for longest session duration
+    for (let i = 0; i < customerCount; i++) {
+        const name = formData.get(`customers[${i}][name]`);
+        const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
 
-                for (let i = 0; i < customerCount; i++) {
-                    const name = formData.get(`customers[${i}][name]`);
-                    const sessionDuration = parseFloat(formData.get(`customers[${i}][sessionDuration]`));
+        if (sessionDuration > longestSessionDuration) {
+            longestSessionDuration = sessionDuration;
+        }
+    }
 
-                    // Update longest session duration
-                    if (sessionDuration > longestSessionDuration) {
-                        longestSessionDuration = sessionDuration;
-                    }
+    console.log(couponCode);
+    
+    try {
+        couponCode = couponCode.toUpperCase();
+        const response = await fetch(`/codes/codes/${encodeURIComponent(couponCode)}`);
+        const data = await response.json();
 
-                }
+        console.log(data);
 
-
-            console.log(couponCode)
-            try {
-                couponCode = couponCode.toUpperCase(); // Convert coupon code to uppercase for consistency
-                // Make a GET request to fetch coupon data from the backend API using the entered coupon code
-                const response = await fetch(`/codes/codes/${encodeURIComponent(couponCode)}`);
-
-                // Check if the response is okay (status code 200-299)
-                const data = await response.json(); // Parse JSON response
-
-                // Debugging purpose: log the response data to the console
-                console.log(data);
-
-                // Check if the coupon is valid
-                if (response.ok && data && data.Code === couponCode && data.Validity != 'Used') {
-                    // Extract reward type from the "Reward" field (assuming it's a string, e.g., "15% off Coupon (PC & PS)")
-                    const reward = data.Reward;
-
-                    // Apply the reward logic based on the coupon
-                    let discountedCPrice = applyReward(reward, longestSessionDuration, platform, totalPrice);
-                    discountedCPrice = Math.round(discountedCPrice); // Round off to the nearest integer
-
-                    // Update the total price input field
-                    document.getElementById("totalPrice").value = discountedCPrice;
-
-                    
-                    if (isMember && parseFloat(document.getElementById(`primaryWallet`).value) >= parseFloat(document.getElementById("totalPrice").value)) {
-                            disableEnableButton("false")
-                        }else if(!isMember){
-                            disableEnableButton("false") 
-                        }else {
-                            disableEnableButton("true")
-                        }
-                        
-                    alert(`Coupon applied! Total price after applying reward: ₹${discountedCPrice}`);
-                } else {
-const couponCode = document.getElementById('couponCode');
-couponCode.value = ''; // Clear the coupon code input field
-
-setTimeout(() => {
-    alert(data.message || 'Invalid coupon code or coupon expired.'); // Show error message after 100ms
-}, 100);
-
-                }
-            } catch (error) {
-                console.error('Error verifying coupon:', error);
-                alert('An error occurred while checking the coupon. Please try again.'); // Show generic error message
-            }
-
-            // Return the updated total price
+        // Check if the response is valid
+        if (!response.ok || !data || data.Code !== couponCode) {
+            const couponCodeInput = document.getElementById('couponCode');
+            couponCodeInput.value = '';
+            
+            setTimeout(() => {
+                alert(data.message || 'Invalid coupon code.');
+            }, 100);
             return totalPrice;
         }
+
+        // Check if coupon has been used/redeemed
+        if (data.Validity === 'Used') {
+            const couponCodeInput = document.getElementById('couponCode');
+            couponCodeInput.value = '';
+            
+            setTimeout(() => {
+                alert('This coupon has already been used.');
+            }, 100);
+            return totalPrice;
+        }
+
+        // Validate coupon expiry based on redemption date and validity period
+        if (data.Date && data.Validity) {
+            const redemptionDate = new Date(data.Date);
+            const currentDate = new Date();
+            
+            // Extract number of days from Validity field (e.g., "7 days" -> 7, "30 days" -> 30)
+            const validityMatch = data.Validity.match(/(\d+)\s*days?/i);
+            
+            if (validityMatch) {
+                const validityDays = parseInt(validityMatch[1]);
+                
+                // Calculate expiry date
+                const expiryDate = new Date(redemptionDate);
+                expiryDate.setDate(expiryDate.getDate() + validityDays);
+                
+                // Check if coupon has expired
+                if (currentDate > expiryDate) {
+                    const couponCodeInput = document.getElementById('couponCode');
+                    couponCodeInput.value = '';
+                    
+                    setTimeout(() => {
+                        alert(`This coupon expired on ${expiryDate.toLocaleDateString()}. Please use a valid coupon.`);
+                    }, 100);
+                    return totalPrice;
+                }
+                
+                console.log(`Coupon valid until: ${expiryDate.toLocaleDateString()}`);
+            }
+        }
+
+        // Extract reward type from the "Reward" field
+        const reward = data.Reward;
+
+        // Apply the reward logic based on the coupon
+        let discountedCPrice = applyReward(reward, longestSessionDuration, platform, totalPrice);
+        discountedCPrice = Math.round(discountedCPrice);
+
+        // Update the total price input field
+        document.getElementById("totalPrice").value = discountedCPrice;
+
+        if (isMember && parseFloat(document.getElementById(`primaryWallet`).value) >= parseFloat(document.getElementById("totalPrice").value)) {
+            disableEnableButton("false");
+        } else if (!isMember) {
+            disableEnableButton("false");
+        } else {
+            disableEnableButton("true");
+        }
+        
+        alert(`Coupon applied! Total price after applying reward: ₹${discountedCPrice}`);
+        
+    } catch (error) {
+        console.error('Error verifying coupon:', error);
+        alert('An error occurred while checking the coupon. Please try again.');
+    }
+
+    return totalPrice;
+}
 
         document.getElementById('check-coupon-btn').addEventListener('click', ()=>{
             calculateTotalPrice();

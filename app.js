@@ -9,6 +9,7 @@ const editSessionRoutes = require('./routes/editSessionRoutes'); // Edit session
 const cpLogRoutes = require('./routes/cpLogsRoutes');
 const { connectDb } = require('./config/db'); // Database connection
 const path = require('path');
+// const matchRoutes = require('./routes/1v1match'); // Import 1v1 match routes
 
 const app = express();
 const PORT = 3000;
@@ -72,6 +73,11 @@ app.use('/edit', editSessionRoutes); // Edit session routes
 app.use('/referrals', require('./routes/referralLogsRoutes') ); // Edit session routes
 app.use('/tournament', require('./routes/tournamentRoutes')); // Tournament routes
 app.use('/cp', cpLogRoutes);
+
+
+// app.use('/match', matchRoutes);
+// app.set('view engine', 'ejs');
+// app.set('views', './src/views');
 
 // Start the server
 app.listen(PORT, async () => {
