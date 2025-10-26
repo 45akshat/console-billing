@@ -33,10 +33,11 @@ exports.createSession = async (sessionData) => {
 
         // If a coupon is provided, mark its validity as 'Used'
         if (session.coupon) {
+            const couponCode = session.coupon.toUpperCase();
             await Code.findOneAndUpdate(
-                { Code: session.coupon },
-                { Validity: 'Used' },
-                { new: true }
+            { Code: couponCode },
+            { Validity: 'Used' },
+            { new: true }
             );
         }
 
