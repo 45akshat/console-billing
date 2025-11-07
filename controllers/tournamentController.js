@@ -1,6 +1,54 @@
 // === CONTROLLER: controllers/tournamentController.js ===
 const Tournament = require('../models/tournament');
 
+// Ping endpoint for connection check
+exports.ping = async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Backend connection successful',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Backend connection failed',
+      error: error.message
+    });
+  }
+};
+
+// Render match form
+exports.renderMatchForm = async (req, res) => {
+  try {
+    // Pass user data to the template for authentication context
+    res.render('1v1_tournament/matchForm', { user: req.user });
+  } catch (error) {
+    console.error('Error rendering match form:', error);
+    res.status(500).send('Error loading match form');
+  }
+};
+
+// Process match results
+exports.processMatch = async (req, res) => {
+  try {
+    const matchData = req.body;
+    // Add your match processing logic here
+    // This is a basic response for now
+    res.json({
+      status: 'success',
+      message: 'Match processed successfully',
+      data: matchData
+    });
+  } catch (error) {
+    console.error('Error processing match:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error processing match'
+    });
+  }
+};
+
 // Render all tournaments
 exports.renderAllTournaments = async (req, res) => {
   try {
