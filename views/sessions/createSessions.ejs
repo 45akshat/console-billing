@@ -483,27 +483,6 @@ function updateCustomerIndexes() {
 
         console.log(data);
 
-        // Check if the response is valid
-        if (!response.ok || !data || data.Code !== couponCode) {
-            const couponCodeInput = document.getElementById('couponCode');
-            couponCodeInput.value = '';
-            
-            setTimeout(() => {
-                alert(data.message || 'Invalid coupon code.');
-            }, 100);
-            return totalPrice;
-        }
-
-        // Check if coupon has been used/redeemed
-        if (data.Validity === 'Used') {
-            const couponCodeInput = document.getElementById('couponCode');
-            couponCodeInput.value = '';
-            
-            setTimeout(() => {
-                alert('This coupon has already been used.');
-            }, 100);
-            return totalPrice;
-        }
 
         // Validate coupon expiry based on redemption date and validity period
         if (data.Date && data.Validity) {
@@ -533,6 +512,29 @@ function updateCustomerIndexes() {
                 
                 console.log(`Coupon valid until: ${expiryDate.toLocaleDateString()}`);
             }
+        }
+
+
+        // Check if the response is valid
+        if (!response.ok || !data || data.Code !== couponCode) {
+            const couponCodeInput = document.getElementById('couponCode');
+            couponCodeInput.value = '';
+            
+            setTimeout(() => {
+                alert(data.message || 'Invalid coupon code.');
+            }, 100);
+            return totalPrice;
+        }
+
+        // Check if coupon has been used/redeemed
+        if (data.Validity === 'Used') {
+            const couponCodeInput = document.getElementById('couponCode');
+            couponCodeInput.value = '';
+            
+            setTimeout(() => {
+                alert('This coupon has already been used.');
+            }, 100);
+            return totalPrice;
         }
 
         // Extract reward type from the "Reward" field
