@@ -29,6 +29,17 @@ exports.renderMatchForm = async (req, res) => {
   }
 };
 
+// Render admin dashboard
+exports.renderAdmin = async (req, res) => {
+  try {
+    // Pass user data to the template for authentication context
+    res.render('1v1_tournament/admin', { user: req.user });
+  } catch (error) {
+    console.error('Error rendering admin dashboard:', error);
+    res.status(500).send('Error loading admin dashboard');
+  }
+};
+
 // Process match results
 exports.processMatch = async (req, res) => {
   try {

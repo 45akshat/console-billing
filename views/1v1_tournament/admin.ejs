@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIFA Tournament Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --fifa-dark: #0a2240;
+            --fifa-blue: #1e90ff;
+            --fifa-gold: #ffd700;
+            --fifa-green: #2e8b57;
+            --fifa-red: #dc143c;
+            --fifa-white: #ffffff;
+            --fifa-light: #f0f8ff;
+            --card-bg: #1a2b4a;
+            --highlight-bg: #2a3b5a;
+            --primary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --secondary-gradient: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%);
+            --sidebar-width: 200px;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: url("https://framerusercontent.com/images/ivawcO0RkSFFfT2mL6vMfFXqFrA.png?width=325&height=238")
+              center/cover no-repeat fixed;
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 2rem;
+            margin: 0;
+            display: flex;
+        }
+
+        /* Sidebar Styles */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100%;
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .side-menu nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .side-menu nav ul li {
+            margin-bottom: 10px;
+        }
+
+        .side-menu nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .side-menu nav ul li a:hover {
+            background-color: #555;
+        }
+
+        .side-menu nav ul li a i {
+            margin-right: 10px;
+        }
+
+        .side-menu nav ul li a.active {
+            font-weight: bold;
+            background-color: #007bff;
+        }
+
+        /* Main content adjustment for sidebar */
+        .main-content {
+            margin-left: 220px;
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .navbar-admin {
+            background: linear-gradient(90deg, #0f3460 0%, #16213e 100%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .navbar-admin h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--admin-gold);
+        }
+
+        .navbar-admin small {
+            color: rgba(255, 255, 255, 0.7);
+            display: block;
+            font-size: 0.85rem;
+        }
+
+        .auth-section {
+            background: rgba(20, 20, 40, 0.9);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 0 auto;
+            border: 1px solid var(--admin-accent);
+            box-shadow: 0 8px 20px rgba(233, 69, 96, 0.2);
+            max-width: 450px;
+        }
+
+        .auth-section h3 {
+            color: var(--admin-gold);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-group input {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid var(--admin-accent);
+            padding: 0.75rem;
+            border-radius: 6px;
+            color: black;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--admin-gold);
+            box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.1);
+            background: white;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--admin-accent) 0%, #ff6b6b 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(233, 69, 96, 0.3);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .dashboard-container {
+            display: none;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-container.show {
+            display: block;
+        }
+
+        .stats-header {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100%;
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--admin-accent) 0%, #ff6b6b 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card h5 {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--fifa-gold);
+        }
+
+        .top-player-info {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .top-player-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .top-player-email {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-style: italic;
+        }
+
+        .controls-section {
+            background: rgba(20, 20, 40, 0.9);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--admin-accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .controls-section h4 {
+            color: var(--admin-gold);
+            margin: 0;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-field {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--fifa-blue);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: #000;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: #fff;
+            border-color: var(--fifa-gold);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+        }
+
+        .btn-action {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-refresh {
+            background: var(--admin-success);
+            color: white;
+        }
+
+        .btn-refresh:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .btn-logout {
+            background: var(--admin-danger);
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .table-container {
+            background: rgba(20, 20, 40, 0.9);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--admin-accent);
+            margin-bottom: 2rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .table {
+            margin: 0;
+            color: white;
+            min-width: 900px;
+        }
+
+        .table thead th {
+            background: linear-gradient(90deg, var(--admin-accent) 0%, #ff6b6b 100%);
+            color: white;
+            font-weight: 700;
+            border: none;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            border-color: rgba(233, 69, 96, 0.2);
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(233, 69, 96, 0.1);
+        }
+
+        .player-rank {
+            font-weight: 700;
+            color: var(--admin-gold);
+            font-size: 1.1rem;
+        }
+
+        .player-rating {
+            color: #3498db;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .player-name {
+            text-align: left;
+        }
+
+        .player-email {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .btn-edit {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-edit:hover {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            color: white;
+            border: 2px solid var(--fifa-blue);
+        }
+
+        .modal-header {
+            background: linear-gradient(90deg, var(--admin-accent) 0%, #ff6b6b 100%);
+            border: none;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(233, 69, 96, 0.2);
+        }
+
+        .form-group label {
+            color: var(--admin-gold);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid var(--admin-accent);
+            padding: 0.75rem;
+            border-radius: 6px;
+            color: black;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--admin-gold);
+            box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group small {
+            color: rgba(255, 255, 255, 0.6);
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .stats-preview {
+            background: rgba(233, 69, 96, 0.1);
+            border-left: 3px solid var(--admin-accent);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-preview h6 {
+            color: var(--admin-gold);
+            margin-bottom: 1rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            align-items: center;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .stat-values {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stat-old {
+            color: var(--fifa-gold);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .stat-arrow {
+            color: var(--admin-gold);
+            font-weight: bold;
+        }
+
+        .stat-new {
+            color: var(--admin-success);
+            font-weight: 600;
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, var(--admin-success) 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-update:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .alert-box {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            max-width: 400px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(450px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background: rgba(39, 174, 96, 0.2);
+            border: 1px solid var(--admin-success);
+            color: var(--admin-success);
+        }
+
+        .alert-danger {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid var(--admin-danger);
+            color: var(--admin-danger);
+        }
+
+        .alert-box.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid var(--admin-gold);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 999;
+        }
+
+        /* Pagination Styles */
+        .pagination-container {
+            background: rgba(20, 20, 40, 0.9);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid var(--fifa-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pagination-info {
+            color: var(--fifa-gold);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .pagination {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 0.5rem;
+        }
+
+        .page-item {
+            margin: 0;
+        }
+
+        .page-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, var(--fifa-blue) 0%, #1e90ff 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .page-link:hover {
+            background: linear-gradient(135deg, #1e90ff 0%, var(--fifa-blue) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 144, 255, 0.3);
+            color: white;
+        }
+
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--fifa-gold) 0%, #ffd700 100%);
+            color: var(--fifa-dark);
+            font-weight: 700;
+        }
+
+        .page-item.disabled .page-link {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .page-number {
+            min-width: 40px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-admin {
+                padding: 0.75rem 1rem;
+            }
+
+            .navbar-admin h1 {
+                font-size: 1.3rem;
+            }
+
+            .table {
+                font-size: 0.85rem;
+            }
+
+            .table thead th,
+            .table tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .btn-edit {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.75rem;
+            }
+
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-buttons {
+                flex-direction: column;
+            }
+
+            .btn-action {
+                justify-content: center;
+            }
+
+            .alert-box {
+                max-width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+            }
+
+            .auth-section {
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Alert Messages -->
+    <div id="alertBox" class="alert-box"></div>
+
+    <!-- Login Section -->
+    <div class="login-container" id="loginSection">
+        <div class="auth-section">
+            <h3>🔐 Admin Login</h3>
+            <form class="auth-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="adminID">
+                        <i class="fas fa-user"></i> Admin ID
+                    </label>
+                    <input 
+                        type="text" 
+                        id="adminID" 
+                        placeholder="Enter Admin ID"
+                        required
+                        autocomplete="off"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="adminPass">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input 
+                        type="password" 
+                        id="adminPass" 
+                        placeholder="Enter Password"
+                        required
+                        autocomplete="off"
+                    >
+                </div>
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Navbar -->
+        <div class="navbar-admin" id="navbar" style="display: none;">
+            <h1>🛡️ Admin Dashboard</h1>
+            <small>Leaderboard Management System</small>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard-container" id="dashboardContainer">
+        <!-- Stats Header -->
+        <div class="stats-header">
+            <div class="stat-card">
+                <h5>Total Players</h5>
+                <div class="stat-value" id="totalPlayers">0</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                <h5>Top Rated Player</h5>
+                <div class="stat-value" id="topRating">1000</div>
+                <div class="top-player-info">
+                    <div class="top-player-name" id="topPlayerName">-</div>
+                    <div class="top-player-email" id="topPlayerEmail">-</div>
+                </div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%);">
+                <h5>Last Updated</h5>
+                <div class="stat-value" id="lastUpdated" style="font-size: 1.2rem; line-height: 1.4; text-align: center;">Just now</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-section">
+            <h4>📋 Controls</h4>
+            <div class="control-buttons">
+                <div class="search-field">
+                    <input 
+                        type="text" 
+                        id="emailSearch" 
+                        class="search-input" 
+                        placeholder="🔍 Search by email or name..."
+                        onkeyup="handleEmailSearch()"
+                    />
+                </div>
+                <button class="btn-action btn-refresh" onclick="loadLeaderboard()" title="Refresh leaderboard data">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn-action btn-logout" onclick="logout()" title="Logout from admin panel">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Loading leaderboard data...</p>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container" id="tableContainer" style="display: none;">
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player Name</th>
+                            <th>Email</th>
+                            <th>Rating</th>
+                            <th>GS</th>
+                            <th>GC</th>
+                            <th>MP</th>
+                            <th>MW</th>
+                            <th>Win %</th>
+                            <th>City</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container" id="paginationContainer" style="display: none;">
+            <div class="pagination-info">
+                <span>Showing <span id="showingStart">1</span>-<span id="showingEnd">20</span> of <span id="totalPlayersCount">0</span> players</span>
+            </div>
+            <nav aria-label="Player pagination">
+                <ul class="pagination" id="paginationList">
+                    <li class="page-item" id="prevPage">
+                        <a class="page-link" href="#" onclick="goToPage(currentPage - 1)">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                    <!-- Page numbers will be inserted here dynamically -->
+                    <li class="page-item" id="nextPage">
+                        <a class="page-link" href="#" onclick="goToPage(currentPage + 1)">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- No Data -->
+        <div class="no-data" id="noData" style="display: none;">
+            <i class="fas fa-inbox"></i>
+            <p>No players found in leaderboard</p>
+        </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="side-menu" id="sidebar">
+        <nav>
+            <ul>
+                <li><a href="/"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="/sessions/scan"><i class="fas fa-qrcode"></i> Scan QR</a></li>
+                <li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <li><a href="/sessions/create"><i class="fas fa-plus-circle"></i> Create Session</a></li>
+                <li><a href="/sessions/all"><i class="fas fa-list"></i> All Sessions</a></li>
+                <li><a href="/cashlogs/create"><i class="fas fa-money-bill-wave"></i> Create Cash Log</a></li>
+                <li><a href="/cashlogs/all"><i class="fas fa-file-alt"></i> All Cash Logs</a></li>
+                <li><a href="/tournament"><i class="fas fa-trophy"></i> Tournaments</a></li>
+                <li><a href="/tournament/match/form"><i class="fas fa-gamepad"></i> Match Form</a></li>
+                <li><a href="/tournament/admin" class="active"><i class="fas fa-user-shield"></i> Admin Panel</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit"></i> Edit Player Stats
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="stats-preview" id="statsPreview"></div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-star"></i> Rating Deduction
+                        </label>
+                        <input 
+                            type="number" 
+                            id="ratingDeduction" 
+                            placeholder="Enter amount to deduct" 
+                            min="0" 
+                            value="0"
+                        >
+                        <small>Leave as 0 for no change</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-futbol"></i> Goals Scored (GS) Deduction
+                        </label>
+                        <input 
+                            type="number" 
+                            id="gsDeduction" 
+                            placeholder="Enter amount to deduct" 
+                            min="0" 
+                            value="0"
+                        >
+                        <small>Leave as 0 for no change</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-shield-alt"></i> Goals Conceded (GC) Deduction
+                        </label>
+                        <input 
+                            type="number" 
+                            id="gcDeduction" 
+                            placeholder="Enter amount to deduct" 
+                            min="0" 
+                            value="0"
+                        >
+                        <small>Leave as 0 for no change</small>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="button" class="btn-update" onclick="updatePlayerStats()">
+                        <i class="fas fa-check"></i> Update Stats
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ===== DYNAMIC API BASE URL CONFIGURATION =====
+        const ITEMS_PER_PAGE = 20;
+        const API_BASE_URL = 
+            window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+                ? "http://localhost:5000/match"
+                : "https://api.consolegaming.in/match"; // Update for production
+        
+        console.log('🔗 API Base URL:', API_BASE_URL);
+        
+        // ===== STATE MANAGEMENT =====
+        let adminCredentials = null;
+        let currentEditingPlayer = null;
+        let editModal = null;
+        let isLoading = false;
+        let allPlayers = [];
+        let currentPage = 1;
+        let totalPages = 1;
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            console.log('✅ Admin Dashboard Initialized');
+            console.log('🌐 Hostname:', window.location.hostname);
+        });
+
+        // ===== FORM SUBMISSION =====
+        function handleLogin(event) {
+            event.preventDefault();
+            loginAdmin();
+        }
+
+        // ===== LOGIN FUNCTION =====
+        async function loginAdmin() {
+            const adminID = document.getElementById('adminID').value.trim();
+            const adminPass = document.getElementById('adminPass').value.trim();
+
+            if (!adminID || !adminPass) {
+                showAlert('❌ Please enter both Admin ID and Password', 'danger');
+                return;
+            }
+
+            try {
+                console.log('🔐 Attempting admin login...');
+                console.log('📍 API URL:', `${API_BASE_URL}/admin/login`);
+                
+                const response = await axios.post(`${API_BASE_URL}/admin/login`, {
+                    adminID: adminID,
+                    adminPass: adminPass
+                });
+
+                if (response.data.success) {
+                    adminCredentials = { adminID, adminPass };
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('navbar').style.display = 'block';
+                    document.getElementById('dashboardContainer').classList.add('show');
+                    
+                    showAlert('✅ Login successful! Welcome Admin!', 'success');
+                    console.log('✅ Admin authenticated');
+                    
+                    loadLeaderboard();
+                }
+            } catch (error) {
+                console.error('❌ Login error:', error);
+                console.error('📊 Error response:', error.response?.data);
+                
+                if (error.response?.status === 403 || error.response?.status === 401) {
+                    showAlert('❌ Invalid Admin ID or Password', 'danger');
+                } else if (error.code === 'ERR_NETWORK') {
+                    showAlert('❌ Connection error. Backend server may be down.', 'danger');
+                } else {
+                    showAlert('❌ Connection error. Please check your credentials.', 'danger');
+                }
+            }
+        }
+
+        // ===== LOAD LEADERBOARD =====
+        async function loadLeaderboard() {
+            if (!adminCredentials) return;
+
+            if (isLoading) return;
+            isLoading = true;
+
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('tableContainer').style.display = 'none';
+            document.getElementById('noData').style.display = 'none';
+
+            try {
+                console.log('📊 Loading leaderboard...');
+                console.log('📍 API URL:', `${API_BASE_URL}/admin/leaderboard`);
+                
+                const response = await axios.post(`${API_BASE_URL}/admin/leaderboard`, {
+                    adminID: adminCredentials.adminID,
+                    adminPass: adminCredentials.adminPass
+                });
+
+                if (response.data.success) {
+                    allPlayers = response.data.players;
+                    totalPages = Math.ceil(allPlayers.length / ITEMS_PER_PAGE);
+                    
+                    // Update stats
+                    document.getElementById('totalPlayers').textContent = allPlayers.length;
+                    if (allPlayers.length > 0) {
+                        const topPlayer = allPlayers[0];
+                        document.getElementById('topRating').textContent = topPlayer.rating;
+                        document.getElementById('topPlayerName').textContent = topPlayer.name;
+                        document.getElementById('topPlayerEmail').textContent = topPlayer.email;
+                    }
+                    
+                    // Format date and time in requested format: Nov 7, 2025 06:38:45 PM
+                    const now = new Date();
+                    const dateString = now.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    const timeString = now.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
+                    const dateTimeString = `${dateString} ${timeString}`;
+                    document.getElementById('lastUpdated').textContent = dateTimeString;
+
+                    // Render data
+                    if (allPlayers.length === 0) {
+                        document.getElementById('noData').style.display = 'block';
+                        document.getElementById('paginationContainer').style.display = 'none';
+                    } else {
+                        renderCurrentPage();
+                        document.getElementById('tableContainer').style.display = 'block';
+                        document.getElementById('paginationContainer').style.display = 'flex';
+                        updatePagination();
+                    }
+
+                    console.log(`✅ Loaded ${allPlayers.length} players`);
+                }
+            } catch (error) {
+                console.error('❌ Load error:', error);
+                console.error('📊 Error response:', error.response?.data);
+                
+                if (error.response?.status === 403) {
+                    showAlert('❌ Session expired. Please login again.', 'danger');
+                } else if (error.code === 'ERR_NETWORK') {
+                    showAlert('❌ Connection error. Backend server may be down.', 'danger');
+                } else {
+                    showAlert('❌ Failed to load leaderboard. Please try again.', 'danger');
+                }
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                isLoading = false;
+            }
+        }
+
+        // ===== RENDER LEADERBOARD TABLE =====
+        function renderLeaderboard(players) {
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+
+            players.forEach(player => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="player-rank">#${player.rank}</td>
+                    <td class="player-name">${escapeHtml(player.name)}</td>
+                    <td class="player-email">${escapeHtml(player.email)}</td>
+                    <td class="player-rating">${player.rating}</td>
+                    <td>${player.gs}</td>
+                    <td>${player.gc}</td>
+                    <td>${player.mp}</td>
+                    <td>${player.mw}</td>
+                    <td>${player.winPercentage}%</td>
+                    <td>${escapeHtml(player.city)}</td>
+                    <td>
+                        <button class="btn-edit" onclick="openEditModal('${escapeHtml(player.email)}', '${escapeHtml(player.name)}', ${player.rating}, ${player.gs}, ${player.gc})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            console.log(`📋 Rendered ${players.length} player rows`);
+        }
+
+        // ===== OPEN EDIT MODAL =====
+        // ===== OPEN EDIT MODAL =====
+function openEditModal(email, name, rating, gs, gc) {
+  currentEditingPlayer = { email, name, rating, gs, gc };
+
+  const preview = `
+    <h6><i class="fas fa-user-circle"></i> Current Stats - ${escapeHtml(name)}</h6>
+    <div class="stat-row">
+      <span class="stat-label">Email:</span>
+      <span class="stat-old">${escapeHtml(email)}</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Rating:</span>
+      <span class="stat-old">${rating}</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Goals Scored:</span>
+      <span class="stat-old">${gs}</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Goals Conceded:</span>
+      <span class="stat-old">${gc}</span>
+    </div>
+  `;
+
+  document.getElementById('statsPreview').innerHTML = preview;
+  document.getElementById('ratingDeduction').value = '0';
+  document.getElementById('gsDeduction').value = '0';
+  document.getElementById('gcDeduction').value = '0';
+
+  console.log(`🔧 Opening edit modal for ${name} (${email})`);
+  editModal.show();
+}
+
+        // ===== UPDATE PLAYER STATS =====
+        async function updatePlayerStats() {
+            if (!currentEditingPlayer || !adminCredentials) {
+                showAlert('❌ Session expired. Please login again.', 'danger');
+                return;
+            }
+
+            const ratingDeduction = parseInt(document.getElementById('ratingDeduction').value) || 0;
+            const gsDeduction = parseInt(document.getElementById('gsDeduction').value) || 0;
+            const gcDeduction = parseInt(document.getElementById('gcDeduction').value) || 0;
+            if (ratingDeduction === 0 && gsDeduction === 0 && gcDeduction === 0) {
+                showAlert('❌ Please enter at least one deduction value', 'danger');
+                return;
+            }
+
+            try {
+                console.log(`🔄 Updating stats for ${currentEditingPlayer.email}`);
+                console.log('📍 API URL:', `${API_BASE_URL}/admin/update-player-stats`);
+                
+                const response = await axios.post(`${API_BASE_URL}/admin/update-player-stats`, {
+                    adminID: adminCredentials.adminID,
+                    adminPass: adminCredentials.adminPass,
+                    email: currentEditingPlayer.email,
+                    ratingDeduction,
+                    gsDeduction,
+                    gcDeduction,
+                    reason: 'Admin adjustment'
+                });
+
+                if (response.data.success) {
+                    showAlert(`✅ ${currentEditingPlayer.name}'s stats updated successfully!`, 'success');
+                    console.log('✅ Stats updated');
+                    console.log('📊 Response:', response.data.data);
+                    editModal.hide();
+                    loadLeaderboard();
+                }
+            } catch (error) {
+                console.error('❌ Update error:', error);
+                console.error('📊 Error response:', error.response?.data);
+                
+                if (error.response?.status === 403) {
+                    showAlert('❌ Invalid credentials. Session expired.', 'danger');
+                } else if (error.code === 'ERR_NETWORK') {
+                    showAlert('❌ Connection error. Backend server may be down.', 'danger');
+                } else {
+                    showAlert('❌ Failed to update player stats. Please try again.', 'danger');
+                }
+            }
+        }
+
+        // ===== SHOW ALERT =====
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert-box alert-${type} show`;
+            alertBox.innerHTML = message;
+            alertBox.style.display = 'block';
+
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // ===== LOGOUT =====
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                adminCredentials = null;
+                currentEditingPlayer = null;
+                document.getElementById('loginSection').style.display = 'flex';
+                document.getElementById('navbar').style.display = 'none';
+                document.getElementById('dashboardContainer').classList.remove('show');
+                document.getElementById('adminID').value = '';
+                document.getElementById('adminPass').value = '';
+                showAlert('✅ Logged out successfully', 'success');
+                console.log('✅ Admin logged out');
+            }
+        }
+
+        // ===== SEARCH FUNCTION =====
+        function handleEmailSearch() {
+            const searchQuery = document.getElementById('emailSearch').value.toLowerCase().trim();
+            
+            if (searchQuery === '') {
+                // Reset to show all players
+                renderCurrentPage();
+                document.getElementById('paginationContainer').style.display = 'flex';
+                return;
+            }
+            
+            // Filter players by email OR name
+            const filteredPlayers = allPlayers.filter(player => 
+                player.email.toLowerCase().includes(searchQuery) ||
+                player.name.toLowerCase().includes(searchQuery)
+            );
+            
+            if (filteredPlayers.length === 0) {
+                document.getElementById('noData').style.display = 'block';
+                document.getElementById('tableContainer').style.display = 'none';
+                document.getElementById('paginationContainer').style.display = 'none';
+            } else {
+                document.getElementById('noData').style.display = 'none';
+                document.getElementById('tableContainer').style.display = 'block';
+                document.getElementById('paginationContainer').style.display = 'none';
+                renderLeaderboard(filteredPlayers);
+            }
+        }
+
+        // ===== PAGINATION FUNCTIONS =====
+        function renderCurrentPage() {
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, allPlayers.length);
+            const currentPlayers = allPlayers.slice(startIndex, endIndex);
+            
+            renderLeaderboard(currentPlayers);
+        }
+
+        function updatePagination() {
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, allPlayers.length);
+            
+            // Update pagination info
+            document.getElementById('showingStart').textContent = startIndex + 1;
+            document.getElementById('showingEnd').textContent = endIndex;
+            document.getElementById('totalPlayersCount').textContent = allPlayers.length;
+            
+            // Update pagination buttons
+            const paginationList = document.getElementById('paginationList');
+            const prevPage = document.getElementById('prevPage');
+            const nextPage = document.getElementById('nextPage');
+            
+            // Clear existing page numbers
+            const existingPages = paginationList.querySelectorAll('.page-number-item');
+            existingPages.forEach(item => item.remove());
+            
+            // Update prev/next button states
+            prevPage.classList.toggle('disabled', currentPage === 1);
+            nextPage.classList.toggle('disabled', currentPage === totalPages);
+            
+            // Generate page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            // Add page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                const pageItem = document.createElement('li');
+                pageItem.className = `page-item page-number-item ${i === currentPage ? 'active' : ''}`;
+                pageItem.innerHTML = `
+                    <a class="page-link page-number" href="#" onclick="goToPage(${i})">${i}</a>
+                `;
+                nextPage.parentNode.insertBefore(pageItem, nextPage);
+            }
+        }
+
+        function goToPage(page) {
+            if (page < 1 || page > totalPages || page === currentPage) return;
+            
+            currentPage = page;
+            renderCurrentPage();
+            updatePagination();
+            
+            // Scroll to top of table
+            document.getElementById('tableContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ===== UTILITY: ESCAPE HTML =====
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>

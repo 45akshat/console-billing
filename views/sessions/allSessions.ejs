@@ -235,6 +235,7 @@ new Chart(timeCtx, {
                 <li><a href="/cashlogs/all"><i class="fas fa-file-alt"></i> All Cash Logs</a></li>
 <li><a href="/tournament" ><i class="fas fa-trophy"></i> Tournaments</a></li>
                 <li><a href="/tournament/match/form"><i class="fas fa-gamepad"></i> Match Form</a></li>
+                <li><a href="/tournament/admin"><i class="fas fa-user-shield"></i> Admin Panel</a></li>
 
             </ul>
         </nav>
@@ -380,7 +381,7 @@ new Chart(timeCtx, {
     
                         <td>
                             <button 
-                                onclick="generateInvoice('<%- JSON.stringify(session).replace(/'/g, '&#39;').replace(/"/g, '&quot;') %>')" 
+                                onclick="generateInvoice('<%= encodeURIComponent(JSON.stringify(session)) %>')" 
                                 style="background: none; border: none; cursor: pointer;" 
                                 title="Generate Invoice">
                                 <!-- SVG Icon -->
