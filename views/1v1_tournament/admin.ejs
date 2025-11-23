@@ -767,52 +767,20 @@
     <!-- Alert Messages -->
     <div id="alertBox" class="alert-box"></div>
 
-    <!-- Login Section -->
-    <div class="login-container" id="loginSection">
-        <div class="auth-section">
-            <h3>🔐 Admin Login</h3>
-            <form class="auth-form" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="adminID">
-                        <i class="fas fa-user"></i> Admin ID
-                    </label>
-                    <input 
-                        type="text" 
-                        id="adminID" 
-                        placeholder="Enter Admin ID"
-                        required
-                        autocomplete="off"
-                    >
-                </div>
-                <div class="form-group">
-                    <label for="adminPass">
-                        <i class="fas fa-lock"></i> Password
-                    </label>
-                    <input 
-                        type="password" 
-                        id="adminPass" 
-                        placeholder="Enter Password"
-                        required
-                        autocomplete="off"
-                    >
-                </div>
-                <button type="submit" class="btn-login">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </button>
-            </form>
-        </div>
-    </div>
+    <!-- Alert Messages -->
+    <div id="alertBox" class="alert-box"></div>
 
     <!-- Main Content -->
     <div class="main-content">
         <!-- Navbar -->
-        <div class="navbar-admin" id="navbar" style="display: none;">
+        <!-- Navbar -->
+        <div class="navbar-admin" id="navbar">
             <h1>🛡️ Admin Dashboard</h1>
             <small>Leaderboard Management System</small>
         </div>
 
         <!-- Dashboard -->
-        <div class="dashboard-container" id="dashboardContainer">
+        <div class="dashboard-container show" id="dashboardContainer">
         <!-- Stats Header -->
         <div class="stats-header">
             <div class="stat-card">
@@ -848,9 +816,6 @@
                 </div>
                 <button class="btn-action btn-refresh" onclick="loadLeaderboard()" title="Refresh leaderboard data">
                     <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-                <button class="btn-action btn-logout" onclick="logout()" title="Logout from admin panel">
-                    <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             </div>
         </div>
@@ -1009,13 +974,12 @@
         const ITEMS_PER_PAGE = 20;
         const API_BASE_URL = 
             window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-                ? "http://localhost:5000/match"
+                ? "https://e0c0cbcf7466.ngrok-free.app/match"
                 : "https://api.consolegaming.in/match"; // Update for production
         
         console.log('🔗 API Base URL:', API_BASE_URL);
         
         // ===== STATE MANAGEMENT =====
-        let adminCredentials = null;
         let currentEditingPlayer = null;
         let editModal = null;
         let isLoading = false;
@@ -1028,77 +992,15 @@
             editModal = new bootstrap.Modal(document.getElementById('editModal'));
             console.log('✅ Admin Dashboard Initialized');
             console.log('🌐 Hostname:', window.location.hostname);
+            loadLeaderboard();
         });
 
-        // ===== FORM SUBMISSION =====
-        function handleLogin(event) {
-            event.preventDefault();
-            loginAdmin();
-        }
 
-        // ===== LOGIN FUNCTION =====
-        async function loginAdmin() {
-            const adminID = document.getElementById('adminID').value.trim();
-            const adminPass = document.getElementById('adminPass').value.trim();
-
-            if (!adminID || !adminPass) {
-                showAlert('❌ Please enter both Admin ID and Password', 'danger');
-                return;
-            }
-
-            try {
-                console.log('🔐 Attempting admin login...');
-                console.log('📍 API URL:', `${API_BASE_URL}/admin/login`);
-                
-                const response = await axios.post(`${API_BASE_URL}/admin/login`, {
-                    adminID: adminID,
-                    adminPass: adminPass
-                });
-
-                if (response.data.success) {
-                    adminCredentials = { adminID, adminPass };
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('navbar').style.display = 'block';
-                    document.getElementById('dashboardContainer').classList.add('show');
-                    
-                    showAlert('✅ Login successful! Welcome Admin!', 'success');
-                    console.log('✅ Admin authenticated');
-                    
-                    loadLeaderboard();
-                }
-            } catch (error) {
-                console.error('❌ Login error:', error);
-                console.error('📊 Error response:', error.response?.data);
-                
-                if (error.response?.status === 403 || error.response?.status === 401) {
-                    showAlert('❌ Invalid Admin ID or Password', 'danger');
-                } else if (error.code === 'ERR_NETWORK') {
-                    showAlert('❌ Connection error. Backend server may be down.', 'danger');
-                } else {
-                    showAlert('❌ Connection error. Please check your credentials.', 'danger');
-                }
-            }
-        }
 
         // ===== LOAD LEADERBOARD =====
         async function loadLeaderboard() {
-            if (!adminCredentials) return;
-
-            if (isLoading) return;
-            isLoading = true;
-
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('tableContainer').style.display = 'none';
-            document.getElementById('noData').style.display = 'none';
-
             try {
-                console.log('📊 Loading leaderboard...');
-                console.log('📍 API URL:', `${API_BASE_URL}/admin/leaderboard`);
-                
-                const response = await axios.post(`${API_BASE_URL}/admin/leaderboard`, {
-                    adminID: adminCredentials.adminID,
-                    adminPass: adminCredentials.adminPass
-                });
+                const response = await axios.post(`${API_BASE_URL}/admin/leaderboard`, {});
 
                 if (response.data.success) {
                     allPlayers = response.data.players;
@@ -1146,9 +1048,7 @@
                 console.error('❌ Load error:', error);
                 console.error('📊 Error response:', error.response?.data);
                 
-                if (error.response?.status === 403) {
-                    showAlert('❌ Session expired. Please login again.', 'danger');
-                } else if (error.code === 'ERR_NETWORK') {
+                if (error.code === 'ERR_NETWORK') {
                     showAlert('❌ Connection error. Backend server may be down.', 'danger');
                 } else {
                     showAlert('❌ Failed to load leaderboard. Please try again.', 'danger');
@@ -1225,31 +1125,19 @@ function openEditModal(email, name, rating, gs, gc) {
 
         // ===== UPDATE PLAYER STATS =====
         async function updatePlayerStats() {
-            if (!currentEditingPlayer || !adminCredentials) {
-                showAlert('❌ Session expired. Please login again.', 'danger');
-                return;
-            }
-
-            const ratingDeduction = parseInt(document.getElementById('ratingDeduction').value) || 0;
-            const gsDeduction = parseInt(document.getElementById('gsDeduction').value) || 0;
-            const gcDeduction = parseInt(document.getElementById('gcDeduction').value) || 0;
-            if (ratingDeduction === 0 && gsDeduction === 0 && gcDeduction === 0) {
-                showAlert('❌ Please enter at least one deduction value', 'danger');
-                return;
-            }
-
             try {
-                console.log(`🔄 Updating stats for ${currentEditingPlayer.email}`);
-                console.log('📍 API URL:', `${API_BASE_URL}/admin/update-player-stats`);
-                
+                const ratingDeduction = document.getElementById('ratingDeduction').value;
+                const gsDeduction = document.getElementById('gsDeduction').value;
+                const gcDeduction = document.getElementById('gcDeduction').value;
+                const reason = document.getElementById('reason') ? document.getElementById('reason').value : 'Admin adjustment';
+
                 const response = await axios.post(`${API_BASE_URL}/admin/update-player-stats`, {
-                    adminID: adminCredentials.adminID,
-                    adminPass: adminCredentials.adminPass,
+                    // adminID and adminPass removed as they are no longer needed/available
                     email: currentEditingPlayer.email,
-                    ratingDeduction,
-                    gsDeduction,
-                    gcDeduction,
-                    reason: 'Admin adjustment'
+                    ratingDeduction: parseInt(ratingDeduction) || 0,
+                    gsDeduction: parseInt(gsDeduction) || 0,
+                    gcDeduction: parseInt(gcDeduction) || 0,
+                    reason: reason
                 });
 
                 if (response.data.success) {
@@ -1263,9 +1151,7 @@ function openEditModal(email, name, rating, gs, gc) {
                 console.error('❌ Update error:', error);
                 console.error('📊 Error response:', error.response?.data);
                 
-                if (error.response?.status === 403) {
-                    showAlert('❌ Invalid credentials. Session expired.', 'danger');
-                } else if (error.code === 'ERR_NETWORK') {
+                if (error.code === 'ERR_NETWORK') {
                     showAlert('❌ Connection error. Backend server may be down.', 'danger');
                 } else {
                     showAlert('❌ Failed to update player stats. Please try again.', 'danger');
@@ -1286,20 +1172,7 @@ function openEditModal(email, name, rating, gs, gc) {
             }, 5000);
         }
 
-        // ===== LOGOUT =====
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                adminCredentials = null;
-                currentEditingPlayer = null;
-                document.getElementById('loginSection').style.display = 'flex';
-                document.getElementById('navbar').style.display = 'none';
-                document.getElementById('dashboardContainer').classList.remove('show');
-                document.getElementById('adminID').value = '';
-                document.getElementById('adminPass').value = '';
-                showAlert('✅ Logged out successfully', 'success');
-                console.log('✅ Admin logged out');
-            }
-        }
+
 
         // ===== SEARCH FUNCTION =====
         function handleEmailSearch() {
