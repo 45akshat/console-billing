@@ -970,18 +970,15 @@
                   <!-- Penalty for Player 1 (hidden by default) -->
                   <div class="mb-3" id="p1PenaltyDiv" style="display: none">
                     <label class="form-label">Penalties (Tiebreaker) *</label>
-                    <select
+                    <input
+                      type="number"
                       id="P1_penalty"
                       name="P1_penalty"
                       class="form-control"
-                    >
-                      <option value="0">0</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                    </select>
+                      min="0"
+                      max="50"
+                      value="0"
+                    />
                     <small class="form-text text-muted"
                       >Required if both players score equal goals</small
                     >
@@ -1015,18 +1012,15 @@
                   <!-- Penalty for Player 2 (hidden by default) -->
                   <div class="mb-3" id="p2PenaltyDiv" style="display: none">
                     <label class="form-label">Penalties (Tiebreaker) *</label>
-                    <select
+                    <input
+                      type="number"
                       id="P2_penalty"
                       name="P2_penalty"
                       class="form-control"
-                    >
-                      <option value="0">0</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                    </select>
+                      min="0"
+                      max="50"
+                      value="0"
+                    />
                     <small class="form-text text-muted"
                       >Required if both players score equal goals</small
                     >
@@ -1515,16 +1509,14 @@
           requiredNumbers.push({
             id: "P1_penalty",
             name: "Player 1 Penalties",
-            type: "select",
             min: 0,
-            max: 5,
+            max: 50,
           });
           requiredNumbers.push({
             id: "P2_penalty",
             name: "Player 2 Penalties",
-            type: "select",
             min: 0,
-            max: 5,
+            max: 50,
           });
         }
 
