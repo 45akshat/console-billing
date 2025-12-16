@@ -381,7 +381,7 @@ new Chart(timeCtx, {
     
                         <td>
                             <button 
-                                onclick="generateInvoice('<%= encodeURIComponent(JSON.stringify(session)) %>')" 
+                                onclick="generateInvoice('<%- encodeURIComponent(JSON.stringify(session)) %>')" 
                                 style="background: none; border: none; cursor: pointer;" 
                                 title="Generate Invoice">
                                 <!-- SVG Icon -->
@@ -456,8 +456,11 @@ new Chart(timeCtx, {
 </body>
 <script>
 function generateInvoice(sessionString) {
-    // Decode the HTML-escaped characters
-    const decodedString = sessionString
+    // First decode the URL encoding
+    const urlDecoded = decodeURIComponent(sessionString);
+    
+    // Then decode the HTML-escaped characters
+    const decodedString = urlDecoded
         .replace(/&#39;/g, "'")
         .replace(/&quot;/g, '"');
 
